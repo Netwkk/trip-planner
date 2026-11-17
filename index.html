@@ -1186,8 +1186,16 @@
       var cachedOverallSummary = null;
       var lastSettlementCopyText = "";
 
+      function getLocalTodayStr() {
+        var d = new Date();
+        var year = d.getFullYear();
+        var month = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return year + '-' + month + '-' + day;
+      }
+
       window.onload = function() {
-        var today = new Date().toISOString().split('T')[0];
+        var today = getLocalTodayStr();
         document.getElementById('date').value = today;
         document.getElementById('ppDate').value = today;
         document.getElementById('rateDate').value = today;
@@ -1387,7 +1395,7 @@
             pendingTodos.slice(0, 4).forEach(function(t) {
               todoHtml += `
                 <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:#FCFBF8; border-radius:10px; margin-bottom:6px;">
-                  <input type="checkbox" onchange="toggleTodoFromHome('${t.id}', this.checked)" style="width:16px; height:16px; margin:0; cursor:pointer; accent-color:#3E7B5D; flex-shrink:0;">
+                  <input type="checkbox" onchange="toggleTodoItem('${t.id}', this.checked)" style="width:16px; height:16px; margin:0; cursor:pointer; accent-color:#3E7B5D; flex-shrink:0;">
                   <div style="min-width:0; flex:1;">
                     <div style="font-size:13px; font-weight:500; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.text}</div>
                     ${t.note ? '<div style="font-size:11px; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'+t.note+'</div>' : ''}
@@ -1402,16 +1410,13 @@
           }
         }
 
-        // 3. Recent Expenses (Fetch latest 3 items)
+        // 3. Recent Expenses (จาก appData ทันที ไม่ต้องยิง API ซ้ำ)
         var recentEl = document.getElementById('homeRecentExpensesList');
         if (recentEl) {
-          google.script.run.withSuccessHandler(function(history) {
-            cachedFullHistory = history;
-            if (!history || history.length === 0) {
-              recentEl.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin:8px 0;'>ยังไม่มีรายการใช้จ่าย</p>";
-              return;
-            }
-            var recentItems = history.slice(-3).reverse();
+          var recentItems = (appData.recentHistoryByTrip && appData.recentHistoryByTrip[trip.name]) ? appData.recentHistoryByTrip[trip.name].slice(0, 3) : [];
+          if (recentItems.length === 0) {
+            recentEl.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin:8px 0;'>ยังไม่มีรายการใช้จ่าย</p>";
+          } else {
             var rHtml = "";
             recentItems.forEach(function(it) {
               var isFund = (it.type === "เติมกองกลาง");
@@ -1428,16 +1433,12 @@
               `;
             });
             recentEl.innerHTML = rHtml;
-          }).getTripHistory(trip.name);
+          }
         }
       }
 
       function toggleTodoFromHome(taskId, isDone) {
-        var trip = getCurrentTrip();
-        if (!trip) return;
-        google.script.run.withSuccessHandler(function(res) {
-          loadAppData(true);
-        }).updateTodoStatus({ tripName: trip.name, taskId: taskId, done: isDone });
+        toggleTodoItem(taskId, isDone);
       }
 
       function refreshTripHeaderAndStats() {
@@ -1470,6 +1471,20 @@
           }
         }
 
+        // อัปเดตตัวเลขสถิติจาก appData ทันที (ไม่ต้องรอโหลดซ้ำ)
+        var stats = (appData.tripStats && appData.tripStats[trip.name]) ? appData.tripStats[trip.name] : null;
+        if (stats) {
+          var totalFmt = "฿" + stats.total.toLocaleString('en-US', {minimumFractionDigits: 2});
+          document.getElementById('totalExpenseDisplay').innerText = totalFmt;
+          var compactExpEl = document.getElementById('compactExpenseDisplay');
+          if (compactExpEl) compactExpEl.innerText = totalFmt;
+          document.getElementById('statMembers').innerText = stats.memberCount + " คน";
+          document.getElementById('statAverage').innerText = "เฉลี่ย ฿" + stats.average.toLocaleString('en-US', {minimumFractionDigits: 2}) + "/คน";
+          document.getElementById('statCount').innerText = stats.countItems + " รายการ";
+        } else {
+          loadTripTotalStats(trip.name);
+        }
+
         var curr = trip.defaultCurrency || 'THB';
         var homeCalcCurrEl = document.getElementById('homeCalcCurr');
         if (homeCalcCurrEl) homeCalcCurrEl.innerText = curr;
@@ -1478,7 +1493,6 @@
 
         if (typeof updateCalcDisplay === 'function') updateCalcDisplay();
         renderHomeDashboard();
-        loadTripTotalStats(trip.name);
         updateRateUI();
         updatePPRateUI();
         renderRateList();
@@ -1928,9 +1942,19 @@
       function toggleTodoItem(taskId, isDone) {
         var trip = getCurrentTrip();
         if (!trip) return;
-        google.script.run.withSuccessHandler(function(res) {
-          loadAppData(true, function() { loadTodoListItems(); });
-        }).updateTodoStatus({ tripName: trip.name, taskId: taskId, done: isDone });
+        var todos = (appData.tripTodos && appData.tripTodos[trip.name]) ? appData.tripTodos[trip.name] : [];
+        var target = todos.find(function(t) { return t.id.toString() === taskId.toString(); });
+        if (target) target.done = isDone;
+
+        refreshTripHeaderAndStats();
+        var todoView = document.getElementById('viewTodoTodoList');
+        if (todoView && todoView.style.display !== 'none') {
+          loadTodoListItems();
+        }
+
+        google.script.run
+          .withFailureHandler(function() { loadAppData(true); })
+          .updateTodoStatus({ tripName: trip.name, taskId: taskId, done: isDone });
       }
 
       function removeTodoItem(taskId) {
@@ -2545,7 +2569,7 @@ function openPersonModal(memberName) {
             else if (sourceView === 'Daily') loadDailyHistoryData();
             else if (sourceView === 'PrePost') { loadPrePostItems(); loadPrePostSummaryOnly(); }
           });
-        }).deleteExpenseItem({ tripName: trip.name, rowIndex: rowIndex });
+        }).deleteExpenseItem({ tripName: trip.name, rowIndex: rowIndex, description: desc });
       }
 
       function submitExpense(event) {
