@@ -3177,7 +3177,7 @@
             memberNames.forEach(function(m) {
               var ov = summaryMap[m].raw;
               var ovPaid = (Number(ov.fundContributed) || 0) + (Number(ov.personalPaid) || 0);
-              var ovShare = (Number(ov.expenseShare) || 0) + (Number(ov.fundShare) || 0);
+              var ovShare = (Number(ov.totalExpenseShareAll !== undefined ? ov.totalExpenseShareAll : ov.expenseShare) || 0) + (Number(ov.fundShare) || 0);
               html += `<tr><td><b>${m}</b></td><td style="color:#059669; font-weight:bold;">฿${ovPaid.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td><td style="color:#d35400;">฿${ovShare.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
             });
             html += `   </table>
@@ -3226,7 +3226,8 @@ function openPersonModal(memberName) {
             if (isFundTopup) {
               payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">เติมกองกลาง</span>`;
             } else if (isPayer) {
-              payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">ออกเงินไปก่อน</span>`;
+              var fullBillFmt = totalBillAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+              payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">ออกเงินไปก่อน (ยอดเต็ม ฿${fullBillFmt})</span>`;
             }
 
             var receiptBtn = it.receiptUrl ? `<button type="button" class="receipt-badge-btn" onclick="openReceiptModal('${it.receiptUrl}')">🧾 ดูสลิป</button>` : "";
@@ -3247,7 +3248,7 @@ function openPersonModal(memberName) {
               <div style="background: #fff; border: 1px solid #EAE6DF; border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
                   <div style="font-size:14px; font-weight:600; color:#222; word-break:break-word; flex:1; line-height:1.4;">${descText}</div>
-                  <div style="font-size:16px; font-weight:bold; color:${isFundTopup || isPayer ? '#059669' : '#111'}; white-space:nowrap;">฿${displayMainAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+                  <div style="font-size:16px; font-weight:bold; color:${isFundTopup || (isPayer && it.isSplitter === false) ? '#059669' : '#111'}; white-space:nowrap;">฿${displayMainAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
                 </div>
                 
                 <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px;">
