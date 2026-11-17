@@ -54,7 +54,7 @@
         word-break: break-word;
       }
       @media (min-width: 480px) {
-        body { background-color: #E2E8F0; padding: 12px 0; }
+        body { background-color: #EAE6DF; padding: 12px 0; }
         .container {
           min-height: calc(100dvh - 24px);
           border-radius: 24px;
@@ -64,7 +64,7 @@
       h2 { text-align: center; color: #333; margin-top: 0; margin-bottom: 20px; font-weight: 700;}
       label { font-size: 14px; font-weight: 500; margin-bottom: 5px; display: block; color: #555; }
       input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 10px; box-sizing: border-box; font-family: 'Prompt', sans-serif; font-size: 15px; background-color: #fff; transition: 0.2s;}
-      input:focus, select:focus, textarea:focus { border-color: #006874; outline: none; }
+      input:focus, select:focus, textarea:focus { border-color: #3E7B5D; outline: none; box-shadow: 0 0 0 3px rgba(62, 123, 93, 0.12); }
       input[readonly], select[readonly] { background-color: #f5f5f5; color: #666; }
       textarea { resize: vertical; min-height: 120px; }
       .row-2 { display: flex; gap: 10px; } .row-2 > div { flex: 1; }
@@ -88,8 +88,8 @@
       .sub-tab-btn { flex: 1; padding: 8px; text-align: center; border-radius: 8px; cursor: pointer; border: none; background: #fff; color: #555; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
       .sub-tab-btn.active { background: #333; color: white; }
 
-      button.submit-btn { width: 100%; background-color: #333; color: white; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);}
-      button.submit-btn:hover { background-color: #222; }
+      button.submit-btn { width: 100%; background-color: #3E7B5D; color: white; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; box-shadow: 0 4px 12px rgba(62, 123, 93, 0.22);}
+      button.submit-btn:hover { background-color: #32644C; }
       
       .stats-card { background: #ffffff; padding: 20px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); text-align: center;}
       .stats-card .title { font-size: 13px; color: #888; margin-bottom: 6px; }
@@ -114,8 +114,8 @@
       .mc-stat-val { font-size: 16px; font-weight: bold; }
 
       .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.48); z-index: 99999; box-sizing: border-box; }
-      .modal-overlay:not(.center-modal) .modal-content { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; max-height: 85dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fafafa; padding: 22px 18px calc(24px + env(safe-area-inset-bottom, 0px)) 18px; border-radius: 24px 24px 0 0; box-shadow: 0 -6px 25px rgba(0,0,0,0.14); margin: 0; box-sizing: border-box; z-index: 100000; animation: slideUpSheet 0.22s ease-out; }
-      .modal-overlay.center-modal .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 28px); max-width: 400px; max-height: 85dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fff; padding: 22px 18px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin: 0; box-sizing: border-box; z-index: 100000; }
+      .modal-overlay:not(.center-modal) .modal-content { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; max-height: 85dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #FAF9F5; padding: 22px 18px calc(24px + env(safe-area-inset-bottom, 0px)) 18px; border-radius: 24px 24px 0 0; box-shadow: 0 -6px 25px rgba(0,0,0,0.14); margin: 0; box-sizing: border-box; z-index: 100000; animation: slideUpSheet 0.22s ease-out; }
+      .modal-overlay.center-modal .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 28px); max-width: 400px; max-height: 85dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #FFFFFF; border: 1px solid #EAE6DF; padding: 22px 18px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin: 0; box-sizing: border-box; z-index: 100000; }
       @keyframes slideUpSheet { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
       .modal-content.box-card { background: #fff; }
       @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -205,7 +205,7 @@
         gap: 3px;
       }
       .clean-action-btn:active {
-        background: #E2E8F0;
+        background: #EAE6DF;
       }
       .clean-action-btn.del {
         background: #fdedec;
@@ -246,7 +246,7 @@
       .status-banner.error { background: #fdedec; color: #c0392b; border: 1px solid #fadbd8; display: block; }
 
       .receipt-upload-box { background: #fff; border: 1px dashed #ccc; border-radius: 12px; padding: 10px 12px; margin-bottom: 15px; font-size: 13px; }
-      .receipt-badge-btn { background: #ebf5fb; color: #2874a6; border: 1px solid #aed6f1; border-radius: 6px; padding: 2px 7px; font-size: 11px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; text-decoration: none; }
+      .receipt-badge-btn { background: #F4FBF7; color: #2D5E46; border: 1px solid #CBE4D6; border-radius: 6px; padding: 2px 7px; font-size: 11px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; text-decoration: none; }
       .action-icon-btn { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 3px 7px; font-size: 11px; cursor: pointer; color: #333; }
       .action-icon-btn.del { background: #fdedec; border-color: #fadbd8; color: #c0392b; }
       .settle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #FCFBF8; border-radius: 12px; margin-bottom: 8px; font-size: 13px; border: 1px solid #f0ece6; }
@@ -403,7 +403,7 @@
       }
 
       /* Bulletproof fix for iOS Safari <input type="date"> intrinsic min-width overflow */
-      input[type="date"] {
+      input[type="date"], input[type="time"] {
         display: block !important;
         width: 100% !important;
         max-width: 100% !important;
@@ -781,7 +781,7 @@
         </div>
 
         <div id="prePostWrapper" style="display:none;">
-          <div style="display:flex; gap:6px; margin-bottom:12px; background:#E2E8F0; padding:4px; border-radius:10px;">
+          <div style="display:flex; gap:6px; margin-bottom:12px; background:#EAE6DF; padding:4px; border-radius:10px;">
             <button type="button" onclick="switchTab('PrePost')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:#fff; color:#222;">✈️ ค่าใช้จ่ายทริป</button>
             <button type="button" onclick="switchTab('Todo')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">✅ เช็คลิสต์</button>
             <button type="button" onclick="switchTab('Settings')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">⚙️ ตั้งค่า</button>
@@ -867,7 +867,7 @@
         </div>
 
         <div id="todoFormWrapper" style="display:none;">
-          <div style="display:flex; gap:6px; margin-bottom:12px; background:#E2E8F0; padding:4px; border-radius:10px;">
+          <div style="display:flex; gap:6px; margin-bottom:12px; background:#EAE6DF; padding:4px; border-radius:10px;">
             <button type="button" onclick="switchTab('PrePost')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">✈️ ค่าใช้จ่ายทริป</button>
             <button type="button" onclick="switchTab('Todo')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:#fff; color:#222;">✅ เช็คลิสต์</button>
             <button type="button" onclick="switchTab('Settings')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">⚙️ ตั้งค่า</button>
@@ -895,7 +895,7 @@
         </div>
 
         <div id="settingsFormWrapper" style="display:none;">
-          <div style="display:flex; gap:6px; margin-bottom:12px; background:#E2E8F0; padding:4px; border-radius:10px;">
+          <div style="display:flex; gap:6px; margin-bottom:12px; background:#EAE6DF; padding:4px; border-radius:10px;">
             <button type="button" onclick="switchTab('PrePost')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">✈️ ค่าใช้จ่ายทริป</button>
             <button type="button" onclick="switchTab('Todo')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">✅ เช็คลิสต์</button>
             <button type="button" onclick="switchTab('Settings')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:#fff; color:#222;">⚙️ ตั้งค่า</button>
@@ -1022,7 +1022,7 @@
 
     <!-- Modal ดูรายละเอียดรายคน -->
     <div id="personModal" class="modal-overlay" onclick="if(event.target===this) closePersonModal()">
-      <div class="modal-content box-card" onclick="event.stopPropagation()" style="background:#fff;">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" >
         <div class="modal-header">
           <div id="modalPersonTitle"></div>
           <button class="close-modal" onclick="closePersonModal()">✕</button>
@@ -1033,7 +1033,7 @@
 
     <!-- Modal แก้ไขรายการเช็คลิสต์ -->
     <div id="editTodoModal" class="modal-overlay center-modal" onclick="if(event.target===this) closeEditTodoModal()">
-      <div class="modal-content box-card" onclick="event.stopPropagation()" style="max-width:400px; background:#fff;">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" style="max-width:400px;">
         <div style="font-weight:bold; font-size:16px; margin-bottom:12px; color:#333;">✏️ แก้ไขรายการเช็คลิสต์</div>
         <input type="hidden" id="editTodoId">
         <label>ชื่อรายการ</label>
@@ -1049,7 +1049,7 @@
 
     <!-- Modal แก้ไขบิลค่าใช้จ่าย / เติมกองกลาง -->
     <div id="editExpenseModal" class="modal-overlay" onclick="if(event.target===this) closeEditExpenseModal()">
-      <div class="modal-content box-card" onclick="event.stopPropagation()" style="background:#fff;">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" >
         <div class="modal-header">
           <div style="font-weight:bold; font-size:17px; color:#222;">✏️ แก้ไขรายการ</div>
           <button class="close-modal" onclick="closeEditExpenseModal()">✕</button>
@@ -1140,7 +1140,7 @@
         </div>
         
         <!-- Direction Toggle Bar -->
-        <div style="display:flex; align-items:center; justify-content:space-between; background:#E2E8F0; padding:4px; border-radius:10px; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; background:#EAE6DF; padding:4px; border-radius:10px; margin-bottom:12px;">
           <button type="button" id="calcMode1Btn" onclick="setCalcMode('foreignToThb')" style="flex:1; border:none; border-radius:8px; padding:6px; font-size:12px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif; background:#fff; color:#333;">💱 ต่างประเทศ ➔ บาท</button>
           <button type="button" id="calcMode2Btn" onclick="setCalcMode('thbToForeign')" style="flex:1; border:none; border-radius:8px; padding:6px; font-size:12px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">บาท ➔ ต่างประเทศ</button>
         </div>
@@ -1173,7 +1173,7 @@
     </div>
     <!-- Modal เพิ่ม/แก้ไขรายการแผนเที่ยว & พิกัด (Itinerary / Hotel / Spots) -->
     <div id="itinFormModal" class="modal-overlay" onclick="if(event.target===this) closeItinFormModal()">
-      <div class="modal-content box-card" onclick="event.stopPropagation()" style="background:#fff;">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" >
         <div class="modal-header">
           <div style="font-weight:bold; font-size:16px; color:#222;" id="itinModalTitle">🗺️ เพิ่มจุดหมาย</div>
           <button class="close-modal" onclick="closeItinFormModal()">✕</button>
@@ -1230,7 +1230,7 @@
 
     <!-- Modal เลือกแอปนำทาง (Multi-Map Picker: Naver / Kakao / Google / Apple / Copy) -->
     <div id="multiMapModal" class="modal-overlay center-modal" onclick="if(event.target===this) closeMultiMapModal()">
-      <div class="modal-content box-card" onclick="event.stopPropagation()" style="max-width:380px; background:#fff;">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" style="max-width:380px;">
         <div class="modal-header">
           <div style="font-weight:bold; font-size:15px; color:#222;">🧭 เลือกแอปนำทาง</div>
           <button class="close-modal" onclick="closeMultiMapModal()">✕</button>
@@ -1270,7 +1270,7 @@
 
     <!-- Quick Action Modal (ปุ่ม + ตรงกลาง) -->
     <div id="quickActionModal" class="modal-overlay" onclick="if(event.target===this) closeQuickActionModal()">
-      <div class="modal-content" style="background:#FAF8F4; padding-bottom: 30px;">
+      <div class="modal-content" style="padding-bottom: 30px;">
         <div class="modal-header" style="border-bottom-color:#EAE6DF;">
           <div style="font-weight:bold; font-size:16px; color:#222;">⚡ เพิ่มรายการด่วน</div>
           <button class="close-modal" onclick="closeQuickActionModal()">✕</button>
@@ -2041,7 +2041,7 @@
 
     <script>
       var appData = { trips: [], rates: [], fundBalances: {}, tripNotes: {}, tripTodos: {}, tripItineraries: {} };
-      var APP_TEXT_CACHE_KEY = "trip_planner_light_cache_v2";
+      var APP_TEXT_CACHE_KEY = "trip_planner_light_cache_v1";
       var selectedItinDate = "";
       var activeMapPlace = "";
       var activeMapQuery = "";
@@ -3137,7 +3137,7 @@
 
             html += `
               <div style="background: white; border-radius: 16px; margin-top: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #ECFDF5; overflow:hidden;">
-                <div onclick="toggleAccordion(this)" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #EEF2FF;">
+                <div onclick="toggleAccordion(this)" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #ECFDF5;">
                   <div style="font-size: 15px; font-weight: bold; color: #059669; display:flex; align-items:center; gap:8px;">
                     <span>💸</span> สรุปการโอนเงินเคลียร์ยอด & ภาพรวม
                   </div>
@@ -3194,7 +3194,7 @@
 function openPersonModal(memberName) {
         if (!cachedPersonData || !cachedPersonData[memberName]) return;
         
-        var items = cachedPersonData[memberName].items || [];
+        var items = cachedPersonData[memberName].items;
         document.getElementById('modalPersonTitle').innerHTML = `
           <div style="display:flex; align-items:center; gap:12px;">
             <div style="width:36px; height:36px; background:#3E7B5D; color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:18px; font-weight:bold;">${memberName.charAt(0).toUpperCase()}</div>
@@ -3211,73 +3211,51 @@ function openPersonModal(memberName) {
           body.innerHTML = "<p style='text-align:center; color:#777; padding:20px;'>ไม่มีรายการ</p>";
         } else {
           var listHtml = "";
-          items.slice().reverse().forEach(function(it) {
+          items.forEach(function(it) {
             var isFundTopup = (it.type === "fund" || it.entryType === "เติมกองกลาง");
             var isPayer = (it.type === "paid" || it.isPayer);
             var displayMainAmt = Number(it.amount !== undefined ? it.amount : (isFundTopup ? it.totalBillAmount : it.shareAmount)) || 0;
             var mainAmtLabel = it.role || (isFundTopup ? "เติมเงินเข้ากองกลาง" : (isPayer ? "สำรองจ่ายเอง" : "ส่วนที่ต้องหาร"));
             var descText = it.desc || it.description || "";
             var totalBillAmt = Number(it.totalBillAmount !== undefined ? it.totalBillAmount : displayMainAmt) || 0;
-            var periodLabel = it.period || 'ระหว่างเที่ยว';
-            var typeLabel = isFundTopup ? 'เติมกองกลาง' : 'ค่าใช้จ่าย';
 
-            var roleBadge = "";
+            var payerBadge = "";
             if (isFundTopup) {
-              roleBadge = `<span style="background:#ECFDF5; color:#059669; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600;">👛 ${mainAmtLabel}</span>`;
+              payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">เติมกองกลาง</span>`;
             } else if (isPayer) {
-              roleBadge = `<span style="background:#ECFDF5; color:#059669; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600;">💳 ${mainAmtLabel}</span>`;
-            } else {
-              roleBadge = `<span style="background:#FEF5E7; color:#D35400; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600;">🧾 ${mainAmtLabel}</span>`;
+              payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">ออกเงินไปก่อน</span>`;
             }
 
             var receiptBtn = it.receiptUrl ? `<button type="button" class="receipt-badge-btn" onclick="openReceiptModal('${it.receiptUrl}')">🧾 ดูสลิป</button>` : "";
 
+            var billDetailText = `${it.date || ''} • ${it.period || 'ระหว่างเที่ยว'}`;
+            if (it.paidBy) billDetailText += ` • จ่ายโดย <b>${it.paidBy}</b>`;
+
             var clearControlHtml = "";
-            if (periodLabel !== 'ระหว่างเที่ยว' && !isFundTopup && it.rowIndex) {
-              var isCleared = (it.clearStatus === 'จ่ายเงินแล้ว');
-              var pillClass = isCleared ? 'cleared' : 'pending';
-              var pillText = isCleared ? '✅ จ่ายแล้ว' : '⏳ ค้างจ่าย';
-              clearControlHtml = `
-                <label class="status-pill ${pillClass}">
-                  <input type="checkbox" ${isCleared ? 'checked' : ''} onchange="toggleStatusGlobally(${it.rowIndex}, '${periodLabel}', '${it.date}', '${escapeAttr(descText)}', ${totalBillAmt}, this.checked, 'Person', '${escapeAttr(memberName)}')" style="width:14px; height:14px; margin:0; cursor:pointer; accent-color:#3E7B5D;">
-                  <span>${pillText}</span>
-                </label>`;
+            if (it.period && it.period !== 'ระหว่างเที่ยว' && !isFundTopup && it.rowIndex) {
+              var isChecked = (it.clearStatus === 'จ่ายเงินแล้ว');
+              clearControlHtml = `<label style="cursor:pointer; display:inline-flex; align-items:center; gap:5px; background:${isChecked?'#ECFDF5':'#fdedec'}; padding:4px 10px; border-radius:8px; border:1px solid ${isChecked?'#a9dfbf':'#fadbd8'};">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleStatusGlobally(${it.rowIndex}, '${it.period}', '${it.date}', '${escapeAttr(descText)}', ${totalBillAmt}, this.checked, 'Person', '${memberName}')" style="width:14px; height:14px; margin:0; accent-color:#3E7B5D;">
+                <span style="color:${isChecked?'#059669':'#c0392b'}; font-weight:bold; font-size:11px;">${isChecked?'✅ จ่ายแล้ว':'⏳ ค้างจ่าย'}</span>
+              </label>`;
             }
 
-            var amtColor = isFundTopup ? '#059669' : (isPayer ? '#059669' : '#222');
-            var amtPrefix = isFundTopup ? '+' : '';
-            var billTotalSub = (!isFundTopup && !isPayer && Math.abs(totalBillAmt - displayMainAmt) > 0.01)
-              ? `<div style="font-size:11px; color:#888; margin-top:2px;">จากบิลรวม ฿${totalBillAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>`
-              : '';
-
             listHtml += `
-              <div class="history-item">
-                <div class="history-card-top">
-                  <div>
-                    <div style="font-size: 11px; color: #888; margin-bottom: 2px;">${it.date || ''} • ${typeLabel} (${periodLabel})</div>
-                    <div class="history-card-title">${descText}</div>
-                  </div>
-                  <div style="text-align:right;">
-                    <div class="history-card-amount" style="color: ${amtColor};">
-                      ${amtPrefix}฿${displayMainAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}
-                    </div>
-                    ${billTotalSub}
-                  </div>
+              <div style="background: #fff; border: 1px solid #EAE6DF; border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
+                  <div style="font-size:14px; font-weight:600; color:#222; word-break:break-word; flex:1; line-height:1.4;">${descText}</div>
+                  <div style="font-size:16px; font-weight:bold; color:${isFundTopup || isPayer ? '#059669' : '#111'}; white-space:nowrap;">฿${displayMainAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+                </div>
+                
+                <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px;">
+                  ${payerBadge}
+                  ${receiptBtn}
+                  <span style="font-size:11px; color:#888; margin-left:auto;">${mainAmtLabel}</span>
                 </div>
 
-                <div class="history-card-meta">
-                  ${it.paidBy ? `<span>👤 จ่ายโดย: <b>${it.paidBy}</b></span>` : ''}
-                  ${it.splitWith ? `<span>👥 หาร: ${it.splitWith}</span>` : ''}
-                </div>
-
-                <div class="history-card-divider"></div>
-
-                <div class="history-card-footer">
-                  <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                    ${roleBadge}
-                    ${receiptBtn}
-                    ${clearControlHtml}
-                  </div>
+                <div style="font-size:12px; color:#666; border-top:1px solid #f0ece6; padding-top:8px; margin-top:6px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                  <div style="flex:1; min-width:0; word-break:break-word;">${billDetailText}</div>
+                  <div>${clearControlHtml}</div>
                 </div>
               </div>
             `;
@@ -3416,21 +3394,7 @@ function openPersonModal(memberName) {
         google.script.run.withSuccessHandler(function(res) {
           if (viewName === 'Person') {
             google.script.run.withSuccessHandler(function(summaryRes) {
-               if (summaryRes && summaryRes.members) {
-                 var map = {};
-                 summaryRes.members.forEach(function(mObj) {
-                   var paidTotal = (Number(mObj.fundContributed) || 0) + (Number(mObj.personalPaidCleared) || 0);
-                   var shareTotal = (Number(mObj.expenseShare) || 0) + (Number(mObj.fundShare) || 0);
-                   map[mObj.name] = {
-                     paid: paidTotal,
-                     share: shareTotal,
-                     netBalance: Number(mObj.netBalance) || 0,
-                     items: mObj.items || [],
-                     raw: mObj
-                   };
-                 });
-                 cachedPersonData = map;
-               }
+               cachedPersonData = summaryRes.summary;
                if (optMemberName) openPersonModal(optMemberName);
                loadPersonSummaryData(); 
             }).getPerPersonSummary(trip.name);
