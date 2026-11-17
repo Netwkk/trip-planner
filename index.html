@@ -2041,7 +2041,7 @@
 
     <script>
       var appData = { trips: [], rates: [], fundBalances: {}, tripNotes: {}, tripTodos: {}, tripItineraries: {} };
-      var APP_TEXT_CACHE_KEY = "trip_planner_light_cache_v1";
+      var APP_TEXT_CACHE_KEY = "trip_planner_light_cache_v2";
       var selectedItinDate = "";
       var activeMapPlace = "";
       var activeMapQuery = "";
@@ -3194,7 +3194,7 @@
 function openPersonModal(memberName) {
         if (!cachedPersonData || !cachedPersonData[memberName]) return;
         
-        var items = cachedPersonData[memberName].items;
+        var items = cachedPersonData[memberName].items || [];
         document.getElementById('modalPersonTitle').innerHTML = `
           <div style="display:flex; align-items:center; gap:12px;">
             <div style="width:36px; height:36px; background:#3E7B5D; color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:18px; font-weight:bold;">${memberName.charAt(0).toUpperCase()}</div>
@@ -3211,51 +3211,73 @@ function openPersonModal(memberName) {
           body.innerHTML = "<p style='text-align:center; color:#777; padding:20px;'>ไม่มีรายการ</p>";
         } else {
           var listHtml = "";
-          items.forEach(function(it) {
+          items.slice().reverse().forEach(function(it) {
             var isFundTopup = (it.type === "fund" || it.entryType === "เติมกองกลาง");
             var isPayer = (it.type === "paid" || it.isPayer);
             var displayMainAmt = Number(it.amount !== undefined ? it.amount : (isFundTopup ? it.totalBillAmount : it.shareAmount)) || 0;
             var mainAmtLabel = it.role || (isFundTopup ? "เติมเงินเข้ากองกลาง" : (isPayer ? "สำรองจ่ายเอง" : "ส่วนที่ต้องหาร"));
             var descText = it.desc || it.description || "";
             var totalBillAmt = Number(it.totalBillAmount !== undefined ? it.totalBillAmount : displayMainAmt) || 0;
+            var periodLabel = it.period || 'ระหว่างเที่ยว';
+            var typeLabel = isFundTopup ? 'เติมกองกลาง' : 'ค่าใช้จ่าย';
 
-            var payerBadge = "";
+            var roleBadge = "";
             if (isFundTopup) {
-              payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">เติมกองกลาง</span>`;
+              roleBadge = `<span style="background:#ECFDF5; color:#059669; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600;">👛 ${mainAmtLabel}</span>`;
             } else if (isPayer) {
-              payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">ออกเงินไปก่อน</span>`;
+              roleBadge = `<span style="background:#ECFDF5; color:#059669; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600;">💳 ${mainAmtLabel}</span>`;
+            } else {
+              roleBadge = `<span style="background:#FEF5E7; color:#D35400; padding:2px 8px; border-radius:6px; font-size:11px; font-weight:600;">🧾 ${mainAmtLabel}</span>`;
             }
 
             var receiptBtn = it.receiptUrl ? `<button type="button" class="receipt-badge-btn" onclick="openReceiptModal('${it.receiptUrl}')">🧾 ดูสลิป</button>` : "";
 
-            var billDetailText = `${it.date || ''} • ${it.period || 'ระหว่างเที่ยว'}`;
-            if (it.paidBy) billDetailText += ` • จ่ายโดย <b>${it.paidBy}</b>`;
-
             var clearControlHtml = "";
-            if (it.period && it.period !== 'ระหว่างเที่ยว' && !isFundTopup && it.rowIndex) {
-              var isChecked = (it.clearStatus === 'จ่ายเงินแล้ว');
-              clearControlHtml = `<label style="cursor:pointer; display:inline-flex; align-items:center; gap:5px; background:${isChecked?'#ECFDF5':'#fdedec'}; padding:4px 10px; border-radius:8px; border:1px solid ${isChecked?'#a9dfbf':'#fadbd8'};">
-                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleStatusGlobally(${it.rowIndex}, '${it.period}', '${it.date}', '${escapeAttr(descText)}', ${totalBillAmt}, this.checked, 'Person', '${memberName}')" style="width:14px; height:14px; margin:0; accent-color:#3E7B5D;">
-                <span style="color:${isChecked?'#059669':'#c0392b'}; font-weight:bold; font-size:11px;">${isChecked?'✅ จ่ายแล้ว':'⏳ ค้างจ่าย'}</span>
-              </label>`;
+            if (periodLabel !== 'ระหว่างเที่ยว' && !isFundTopup && it.rowIndex) {
+              var isCleared = (it.clearStatus === 'จ่ายเงินแล้ว');
+              var pillClass = isCleared ? 'cleared' : 'pending';
+              var pillText = isCleared ? '✅ จ่ายแล้ว' : '⏳ ค้างจ่าย';
+              clearControlHtml = `
+                <label class="status-pill ${pillClass}">
+                  <input type="checkbox" ${isCleared ? 'checked' : ''} onchange="toggleStatusGlobally(${it.rowIndex}, '${periodLabel}', '${it.date}', '${escapeAttr(descText)}', ${totalBillAmt}, this.checked, 'Person', '${escapeAttr(memberName)}')" style="width:14px; height:14px; margin:0; cursor:pointer; accent-color:#3E7B5D;">
+                  <span>${pillText}</span>
+                </label>`;
             }
 
+            var amtColor = isFundTopup ? '#059669' : (isPayer ? '#059669' : '#222');
+            var amtPrefix = isFundTopup ? '+' : '';
+            var billTotalSub = (!isFundTopup && !isPayer && Math.abs(totalBillAmt - displayMainAmt) > 0.01)
+              ? `<div style="font-size:11px; color:#888; margin-top:2px;">จากบิลรวม ฿${totalBillAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>`
+              : '';
+
             listHtml += `
-              <div style="background: #fff; border: 1px solid #EAE6DF; border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
-                  <div style="font-size:14px; font-weight:600; color:#222; word-break:break-word; flex:1; line-height:1.4;">${descText}</div>
-                  <div style="font-size:16px; font-weight:bold; color:${isFundTopup || isPayer ? '#059669' : '#111'}; white-space:nowrap;">฿${displayMainAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
-                </div>
-                
-                <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px;">
-                  ${payerBadge}
-                  ${receiptBtn}
-                  <span style="font-size:11px; color:#888; margin-left:auto;">${mainAmtLabel}</span>
+              <div class="history-item">
+                <div class="history-card-top">
+                  <div>
+                    <div style="font-size: 11px; color: #888; margin-bottom: 2px;">${it.date || ''} • ${typeLabel} (${periodLabel})</div>
+                    <div class="history-card-title">${descText}</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div class="history-card-amount" style="color: ${amtColor};">
+                      ${amtPrefix}฿${displayMainAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}
+                    </div>
+                    ${billTotalSub}
+                  </div>
                 </div>
 
-                <div style="font-size:12px; color:#666; border-top:1px solid #f0ece6; padding-top:8px; margin-top:6px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-                  <div style="flex:1; min-width:0; word-break:break-word;">${billDetailText}</div>
-                  <div>${clearControlHtml}</div>
+                <div class="history-card-meta">
+                  ${it.paidBy ? `<span>👤 จ่ายโดย: <b>${it.paidBy}</b></span>` : ''}
+                  ${it.splitWith ? `<span>👥 หาร: ${it.splitWith}</span>` : ''}
+                </div>
+
+                <div class="history-card-divider"></div>
+
+                <div class="history-card-footer">
+                  <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    ${roleBadge}
+                    ${receiptBtn}
+                    ${clearControlHtml}
+                  </div>
                 </div>
               </div>
             `;
@@ -3394,7 +3416,21 @@ function openPersonModal(memberName) {
         google.script.run.withSuccessHandler(function(res) {
           if (viewName === 'Person') {
             google.script.run.withSuccessHandler(function(summaryRes) {
-               cachedPersonData = summaryRes.summary;
+               if (summaryRes && summaryRes.members) {
+                 var map = {};
+                 summaryRes.members.forEach(function(mObj) {
+                   var paidTotal = (Number(mObj.fundContributed) || 0) + (Number(mObj.personalPaidCleared) || 0);
+                   var shareTotal = (Number(mObj.expenseShare) || 0) + (Number(mObj.fundShare) || 0);
+                   map[mObj.name] = {
+                     paid: paidTotal,
+                     share: shareTotal,
+                     netBalance: Number(mObj.netBalance) || 0,
+                     items: mObj.items || [],
+                     raw: mObj
+                   };
+                 });
+                 cachedPersonData = map;
+               }
                if (optMemberName) openPersonModal(optMemberName);
                loadPersonSummaryData(); 
             }).getPerPersonSummary(trip.name);
