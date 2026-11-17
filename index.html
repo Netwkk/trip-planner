@@ -12,7 +12,7 @@
     <link rel="shortcut icon" type="image/png" href="travel.png">
     <link rel="apple-touch-icon" href="travel.png">
     <meta name="theme-color" content="#3E7B5D">
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- System Thai & Mobile Fonts for fast offline/international loading -->
     <style>
       * {
         box-sizing: border-box;
@@ -487,6 +487,97 @@
         background: #e2e8f0;
         transform: scale(0.95);
       }
+
+      /* Itinerary Day Selector & Timeline */
+      .day-pills-bar {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 6px;
+        margin-bottom: 14px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .day-pill {
+        flex-shrink: 0;
+        background: #ffffff;
+        border: 1px solid #EAE6DF;
+        border-radius: 14px;
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #555;
+        cursor: pointer;
+        transition: 0.15s;
+        text-align: center;
+      }
+      .day-pill.active {
+        background: #3E7B5D;
+        border-color: #3E7B5D;
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(62, 123, 93, 0.25);
+      }
+      .itin-timeline {
+        position: relative;
+        padding-left: 20px;
+      }
+      .itin-timeline::before {
+        content: "";
+        position: absolute;
+        left: 6px;
+        top: 10px;
+        bottom: 10px;
+        width: 2px;
+        background: #DCE5DF;
+        border-radius: 2px;
+      }
+      .itin-card {
+        position: relative;
+        background: #ffffff;
+        border: 1px solid #EAE6DF;
+        border-radius: 16px;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        transition: 0.2s;
+      }
+      .itin-card::before {
+        content: "";
+        position: absolute;
+        left: -18px;
+        top: 18px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #3E7B5D;
+        border: 2px solid #FAF9F5;
+      }
+      .itin-card.visited {
+        opacity: 0.65;
+        background: #FCFBF8;
+      }
+      .itin-card.visited::before {
+        background: #95A5A6;
+      }
+      .map-choice-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        background: #FAF9F5;
+        border: 1px solid #EAE6DF;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #222;
+        cursor: pointer;
+        text-align: left;
+      }
+      .map-choice-btn:active {
+        background: #ECFDF5;
+        border-color: #3E7B5D;
+      }
     </style>
   </head>
   <body>
@@ -589,6 +680,15 @@
               </div>
               <button type="button" onclick="event.stopPropagation(); openQuickCalcModal();" style="font-size:13px; color:#3E7B5D; font-weight:bold; background:#ECFDF5; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; white-space:nowrap; flex-shrink:0; touch-action: manipulation;">เปิดใช้งาน ➔</button>
             </div>
+          </div>
+
+          <!-- Today's Itinerary Card on Dashboard -->
+          <div id="homeTodayItinCard" style="background: #fff; border-radius: 16px; padding: 15px 18px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span style="font-size:13px; font-weight:bold; color:#333;" id="homeTodayItinTitle">🗺️ แผนเที่ยววันนี้</span>
+              <button type="button" onclick="switchTab('Itinerary')" style="background:none; border:none; color:#3E7B5D; font-size:11px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">ดูตารางเต็ม ➔</button>
+            </div>
+            <div id="homeTodayItinList"></div>
           </div>
 
           <div id="homePendingTodoCard" style="background: #fff; border-radius: 16px; padding: 15px 18px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
@@ -825,6 +925,32 @@
           </div>
         </div>
 
+        <!-- Itinerary Wrapper (แผนเที่ยวรายวัน) -->
+        <div id="itineraryFormWrapper" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:8px;">
+            <div style="font-size:12px; color:#666;" id="itinCacheStatus">⚡ พร้อมใช้งานแม้ออฟไลน์</div>
+            <button type="button" onclick="openAddItinModal()" style="background:#3E7B5D; color:#fff; border:none; border-radius:10px; padding:8px 14px; font-size:12px; font-weight:bold; cursor:pointer; white-space:nowrap;">➕ เพิ่มจุดหมาย</button>
+          </div>
+
+          <!-- Day Selector Pills -->
+          <div id="itinDayPills" class="day-pills-bar"></div>
+
+          <!-- Daily Summary Strip -->
+          <div id="itinDaySummaryCard" style="background:#fff; border:1px solid #EAE6DF; border-radius:14px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div>
+              <div style="font-size:13px; font-weight:700; color:#222;" id="itinSelectedDayTitle">วันที่เลือก</div>
+              <div style="font-size:11px; color:#777; margin-top:2px;" id="itinSelectedDayMeta">0 สถานที่</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:10px; color:#888;">งบประมาณวันนี้</div>
+              <div style="font-size:14px; font-weight:bold; color:#3E7B5D;" id="itinSelectedDayBudget">0</div>
+            </div>
+          </div>
+
+          <!-- Timeline List -->
+          <div id="itinTimelineContainer" class="itin-timeline"></div>
+        </div>
+
       </div>
 
       
@@ -1005,6 +1131,79 @@
         <button type="button" onclick="closeQuickCalcModal()" style="width:100%; background:#333; color:#fff; border:none; border-radius:12px; padding:12px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">เสร็จสิ้น</button>
       </div>
     </div>
+    <!-- Modal เพิ่ม/แก้ไขรายการแผนเที่ยว (Itinerary) -->
+    <div id="itinFormModal" class="modal-overlay" onclick="if(event.target===this) closeItinFormModal()">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" style="background:#fff;">
+        <div class="modal-header">
+          <div style="font-weight:bold; font-size:16px; color:#222;" id="itinModalTitle">🗺️ เพิ่มแผนเที่ยว</div>
+          <button class="close-modal" onclick="closeItinFormModal()">✕</button>
+        </div>
+        <form onsubmit="submitItineraryForm(event)">
+          <input type="hidden" id="itinPlanId">
+          <div class="row-2">
+            <div><label>วันที่</label><input type="date" id="itinDateInput" required></div>
+            <div><label>เวลา (เช่น 09:30)</label><input type="time" id="itinTimeInput" value="09:00"></div>
+          </div>
+          <label>ชื่อสถานที่ / กิจกรรม</label>
+          <input type="text" id="itinPlaceInput" placeholder="เช่น พระราชวังเคียงบกกุง / คาเฟ่ยอนนัมดง" required>
+
+          <label>ชื่อภาษาท้องถิ่น / คำค้นหาแผนที่ (ไม่บังคับ)</label>
+          <input type="text" id="itinLocalNameInput" placeholder="เช่น 경복궁 หรือ สถานีรถไฟ (ใช้ค้นหาใน Naver/Amap)">
+
+          <label>ลิงก์แผนที่โดยตรง (ไม่บังคับ)</label>
+          <input type="url" id="itinMapUrlInput" placeholder="วางลิงก์ Naver Map / Apple Maps / Google Maps">
+
+          <label>งบประมาณโดยประมาณ (<span id="itinEstCurrLabel">THB</span>)</label>
+          <input type="number" id="itinEstCostInput" step="0.01" placeholder="0.00">
+
+          <label>รายละเอียด / โน้ตหน้างาน</label>
+          <textarea id="itinNoteInput" style="min-height:70px;" placeholder="เช่น ทางออก 5, รอบเข้าชม 10:00 น., เมนูแนะนำ"></textarea>
+
+          <button type="submit" class="submit-btn" id="btnSaveItin" style="background:#3E7B5D;">💾 บันทึกแผนเที่ยว</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal เลือกแอปนำทาง (Multi-Map Picker: Naver / Kakao / Google / Apple / Copy) -->
+    <div id="multiMapModal" class="modal-overlay center-modal" onclick="if(event.target===this) closeMultiMapModal()">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" style="max-width:380px; background:#fff;">
+        <div class="modal-header">
+          <div style="font-weight:bold; font-size:15px; color:#222;">🧭 เลือกแอปนำทาง</div>
+          <button class="close-modal" onclick="closeMultiMapModal()">✕</button>
+        </div>
+        <div style="font-size:13px; font-weight:600; color:#3E7B5D; margin-bottom:4px;" id="mapModalPlaceTitle">ชื่อสถานที่</div>
+        <div style="font-size:12px; color:#777; margin-bottom:14px;" id="mapModalQuerySub">คำค้นหา</div>
+
+        <div id="mapDirectLinkWrap" style="display:none; margin-bottom:10px;">
+          <a id="mapDirectLinkBtn" href="#" target="_blank" rel="noopener" class="map-choice-btn" style="background:#ECFDF5; border-color:#3E7B5D; color:#2D5E46; text-decoration:none;">
+            <span>🔗 เปิดลิงก์ที่บันทึกไว้โดยตรง</span>
+            <span>➔</span>
+          </a>
+        </div>
+
+        <button type="button" class="map-choice-btn" onclick="launchExternalMap('naver')">
+          <span>🟢 Naver Map <small style="color:#888; font-weight:400;">(แนะนำสำหรับเกาหลี)</small></span>
+          <span>➔</span>
+        </button>
+        <button type="button" class="map-choice-btn" onclick="launchExternalMap('kakao')">
+          <span>🟡 KakaoMap <small style="color:#888; font-weight:400;">(เกาหลี)</small></span>
+          <span>➔</span>
+        </button>
+        <button type="button" class="map-choice-btn" onclick="launchExternalMap('apple')">
+          <span>🍎 Apple Maps <small style="color:#888; font-weight:400;">(จีน / iOS)</small></span>
+          <span>➔</span>
+        </button>
+        <button type="button" class="map-choice-btn" onclick="launchExternalMap('google')">
+          <span>🔵 Google Maps <small style="color:#888; font-weight:400;">(ทั่วไป)</small></span>
+          <span>➔</span>
+        </button>
+        <button type="button" class="map-choice-btn" style="background:#FEF9E7; border-color:#F9E79F;" onclick="copyMapSearchQuery()">
+          <span>📋 คัดลอกชื่อไปวางใน Amap / Grab / Uber</span>
+          <span>คัดลอก</span>
+        </button>
+      </div>
+    </div>
+
     <!-- Quick Action Modal (ปุ่ม + ตรงกลาง) -->
     <div id="quickActionModal" class="modal-overlay" onclick="if(event.target===this) closeQuickActionModal()">
       <div class="modal-content" style="background:#FAF8F4; padding-bottom: 30px;">
@@ -1013,6 +1212,11 @@
           <button class="close-modal" onclick="closeQuickActionModal()">✕</button>
         </div>
         <div class="quick-action-grid">
+          <div class="qa-btn" onclick="closeQuickActionModal(); switchTab('Itinerary');" style="border-color:#CBE4D6; background:#F4FBF7;">
+            <span class="qa-icon">🗺️</span>
+            <span class="qa-title" style="color:#2D5E46;">แผนเที่ยว (รายวัน)</span>
+            <span class="qa-sub">ตารางเวลา & นำทาง</span>
+          </div>
           <div class="qa-btn" onclick="closeQuickActionModal(); switchTab('Expense');">
             <span class="qa-icon">💸</span>
             <span class="qa-title">บันทึกค่าใช้จ่าย</span>
@@ -1176,10 +1380,340 @@
         window.google.script = window.google.script || {};
         window.google.script.run = createRunner(null, null);
       })();
+
+      function formatThaiShortDate(dateStr) {
+        if (!dateStr || dateStr.indexOf('-') === -1) return dateStr || "";
+        var months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+        var parts = dateStr.split('-');
+        if (parts.length < 3) return dateStr;
+        var d = parseInt(parts[2], 10);
+        var m = parseInt(parts[1], 10) - 1;
+        return d + " " + (months[m] || parts[1]);
+      }
+
+      function renderItineraryView() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var items = (appData.tripItineraries && appData.tripItineraries[trip.name]) ? appData.tripItineraries[trip.name].slice() : [];
+        var pillsContainer = document.getElementById('itinDayPills');
+        var timelineContainer = document.getElementById('itinTimelineContainer');
+        var dayTitleEl = document.getElementById('itinSelectedDayTitle');
+        var dayMetaEl = document.getElementById('itinSelectedDayMeta');
+        var dayBudgetEl = document.getElementById('itinSelectedDayBudget');
+        var curr = trip.defaultCurrency || 'THB';
+
+        if (items.length === 0) {
+          pillsContainer.innerHTML = "";
+          dayTitleEl.innerText = "ยังไม่มีแผนเที่ยว";
+          dayMetaEl.innerText = "กดปุ่ม '+ เพิ่มจุดหมาย' ด้านบนเพื่อเริ่มวางแผนรายวัน";
+          dayBudgetEl.innerText = "0 " + curr;
+          timelineContainer.innerHTML = "<div style='background:#fff; border-radius:16px; padding:24px; text-align:center; color:#888; font-size:13px; border:1px dashed #ddd;'>🗺️ ยังไม่มีรายการในแผนเที่ยว<br><button type='button' onclick='openAddItinModal()' style='margin-top:12px; background:#3E7B5D; color:#fff; border:none; border-radius:10px; padding:10px 16px; font-size:13px; font-weight:bold; cursor:pointer;'>➕ เพิ่มจุดหมายแรก</button></div>";
+          return;
+        }
+
+        var uniqueDates = Array.from(new Set(items.map(function(x) { return x.date; }))).sort();
+        var todayStr = getLocalTodayStr();
+        if (!selectedItinDate || uniqueDates.indexOf(selectedItinDate) === -1) {
+          selectedItinDate = uniqueDates.indexOf(todayStr) !== -1 ? todayStr : uniqueDates[0];
+        }
+
+        var pillsHtml = "";
+        uniqueDates.forEach(function(d, idx) {
+          var isActive = (d === selectedItinDate);
+          var isToday = (d === todayStr);
+          pillsHtml += `<button type="button" class="day-pill ${isActive ? 'active' : ''}" onclick="selectItinDay('${d}')">Day ${idx + 1}${isToday ? ' (วันนี้)' : ''}<div style="font-size:10px; font-weight:400; opacity:0.85;">${formatThaiShortDate(d)}</div></button>`;
+        });
+        pillsContainer.innerHTML = pillsHtml;
+
+        var dayIndex = uniqueDates.indexOf(selectedItinDate) + 1;
+        var dayItems = items.filter(function(x) { return x.date === selectedItinDate; }).sort(function(a, b) {
+          return (a.time || "99:99").localeCompare(b.time || "99:99");
+        });
+
+        var visitedCount = dayItems.filter(function(x) { return x.visited; }).length;
+        var dayBudget = 0;
+        dayItems.forEach(function(x) { dayBudget += (parseFloat(x.estCost) || 0); });
+
+        dayTitleEl.innerText = "Day " + dayIndex + " • " + formatThaiShortDate(selectedItinDate) + (selectedItinDate === todayStr ? " (วันนี้)" : "");
+        dayMetaEl.innerText = dayItems.length + " จุดหมาย • ไปแล้ว " + visitedCount + "/" + dayItems.length;
+        dayBudgetEl.innerText = dayBudget.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + " " + curr;
+
+        var tlHtml = "";
+        dayItems.forEach(function(it) {
+          var costBadge = it.estCost > 0 ? `<span style="background:#FEF9E7; color:#B7950B; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:600;">งบ ~${it.estCost.toLocaleString('en-US')} ${curr}</span>` : "";
+          var localSub = it.localName ? `<div style="font-size:12px; color:#3E7B5D; margin-top:2px;">🏷️ ${it.localName}</div>` : "";
+          var noteSub = it.note ? `<div style="font-size:12px; color:#666; background:#FAF9F5; padding:8px 10px; border-radius:10px; margin-top:8px; white-space:pre-line; line-height:1.4;">${it.note}</div>` : "";
+
+          tlHtml += `
+            <div class="itin-card ${it.visited ? 'visited' : ''}">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div style="display:flex; align-items:flex-start; gap:8px; flex:1; min-width:0;">
+                  <input type="checkbox" ${it.visited ? 'checked' : ''} onchange="toggleItinVisited('${it.id}', this.checked)" style="width:18px; height:18px; margin-top:2px; cursor:pointer; accent-color:#3E7B5D; flex-shrink:0;">
+                  <div style="min-width:0; flex:1;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:2px;">
+                      <span style="background:#ECFDF5; color:#3E7B5D; font-weight:700; font-size:12px; padding:2px 8px; border-radius:8px;">⏰ ${it.time || '--:--'}</span>
+                      ${costBadge}
+                    </div>
+                    <div style="font-size:15px; font-weight:700; color:#222; ${it.visited ? 'text-decoration:line-through;' : ''}">${it.place}</div>
+                    ${localSub}
+                  </div>
+                </div>
+              </div>
+              ${noteSub}
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top:10px; padding-top:10px; border-top:1px solid #F2ECE4; flex-wrap:wrap;">
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  <button type="button" data-place="${escapeAttr(it.place)}" data-local="${escapeAttr(it.localName)}" data-url="${escapeAttr(it.mapUrl)}" onclick="openMultiMapFromBtn(this)" style="background:#ECFDF5; color:#2D5E46; border:1px solid #CBE4D6; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; cursor:pointer;">📍 นำทาง</button>
+                  <button type="button" data-date="${escapeAttr(it.date)}" data-place="${escapeAttr(it.place)}" data-cost="${it.estCost || 0}" onclick="logExpenseFromItinBtn(this)" style="background:#FAF9F5; color:#333; border:1px solid #EAE6DF; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:600; cursor:pointer;">💸 จ่ายเงิน</button>
+                </div>
+                <div style="display:flex; gap:4px;">
+                  <button type="button" data-id="${escapeAttr(it.id)}" onclick="openEditItinModal(this.getAttribute('data-id'))" class="clean-action-btn">✏️</button>
+                  <button type="button" data-id="${escapeAttr(it.id)}" onclick="removeItinItem(this.getAttribute('data-id'))" class="clean-action-btn del">🗑️</button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        timelineContainer.innerHTML = tlHtml;
+      }
+
+      function selectItinDay(dateStr) {
+        selectedItinDate = dateStr;
+        renderItineraryView();
+      }
+
+      function openAddItinModal() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        document.getElementById('itinModalTitle').innerText = "🗺️ เพิ่มแผนเที่ยว";
+        document.getElementById('itinPlanId').value = "";
+        document.getElementById('itinDateInput').value = selectedItinDate || getLocalTodayStr();
+        document.getElementById('itinTimeInput').value = "09:30";
+        document.getElementById('itinPlaceInput').value = "";
+        document.getElementById('itinLocalNameInput').value = "";
+        document.getElementById('itinMapUrlInput').value = "";
+        document.getElementById('itinEstCostInput').value = "";
+        document.getElementById('itinNoteInput').value = "";
+        document.getElementById('itinEstCurrLabel').innerText = trip.defaultCurrency || "THB";
+        showModalAtViewport('itinFormModal');
+      }
+
+      function openEditItinModal(planId) {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var items = (appData.tripItineraries && appData.tripItineraries[trip.name]) ? appData.tripItineraries[trip.name] : [];
+        var item = items.find(function(x) { return x.id.toString() === planId.toString(); });
+        if (!item) return;
+
+        document.getElementById('itinModalTitle').innerText = "✏️ แก้ไขแผนเที่ยว";
+        document.getElementById('itinPlanId').value = item.id;
+        document.getElementById('itinDateInput').value = item.date;
+        document.getElementById('itinTimeInput').value = item.time || "09:30";
+        document.getElementById('itinPlaceInput').value = item.place || "";
+        document.getElementById('itinLocalNameInput').value = item.localName || "";
+        document.getElementById('itinMapUrlInput').value = item.mapUrl || "";
+        document.getElementById('itinEstCostInput').value = item.estCost > 0 ? item.estCost : "";
+        document.getElementById('itinNoteInput').value = item.note || "";
+        document.getElementById('itinEstCurrLabel').innerText = trip.defaultCurrency || "THB";
+        showModalAtViewport('itinFormModal');
+      }
+
+      function closeItinFormModal() {
+        document.getElementById('itinFormModal').style.display = 'none';
+      }
+
+      function submitItineraryForm(event) {
+        event.preventDefault();
+        var trip = getCurrentTrip();
+        if (!trip) return;
+
+        var planId = document.getElementById('itinPlanId').value;
+        var dateVal = document.getElementById('itinDateInput').value;
+        var timeVal = document.getElementById('itinTimeInput').value;
+        var placeVal = document.getElementById('itinPlaceInput').value.trim();
+        var localVal = document.getElementById('itinLocalNameInput').value.trim();
+        var urlVal = document.getElementById('itinMapUrlInput').value.trim();
+        var costVal = parseFloat(document.getElementById('itinEstCostInput').value) || 0;
+        var noteVal = document.getElementById('itinNoteInput').value.trim();
+
+        var btn = document.getElementById('btnSaveItin');
+        btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
+
+        selectedItinDate = dateVal;
+        if (!appData.tripItineraries) appData.tripItineraries = {};
+        if (!appData.tripItineraries[trip.name]) appData.tripItineraries[trip.name] = [];
+
+        if (planId) {
+          var target = appData.tripItineraries[trip.name].find(function(x) { return x.id.toString() === planId.toString(); });
+          if (target) {
+            target.date = dateVal;
+            target.time = timeVal;
+            target.place = placeVal;
+            target.localName = localVal;
+            target.mapUrl = urlVal;
+            target.estCost = costVal;
+            target.note = noteVal;
+          }
+          saveLightTextCache(appData);
+          closeItinFormModal();
+          renderItineraryView();
+          renderHomeDashboard();
+          btn.innerText = "💾 บันทึกแผนเที่ยว"; btn.disabled = false;
+
+          google.script.run.withSuccessHandler(function() {
+            loadAppData(true, function() { renderItineraryView(); });
+          }).editItineraryItem({
+            tripName: trip.name, planId: planId, date: dateVal, time: timeVal,
+            place: placeVal, localName: localVal, mapUrl: urlVal, note: noteVal, estCost: costVal
+          });
+        } else {
+          var newId = 'plan_' + new Date().getTime();
+          appData.tripItineraries[trip.name].push({
+            id: newId, date: dateVal, time: timeVal, place: placeVal,
+            localName: localVal, mapUrl: urlVal, note: noteVal, estCost: costVal, visited: false
+          });
+          saveLightTextCache(appData);
+          closeItinFormModal();
+          renderItineraryView();
+          renderHomeDashboard();
+          btn.innerText = "💾 บันทึกแผนเที่ยว"; btn.disabled = false;
+
+          google.script.run.withSuccessHandler(function() {
+            loadAppData(true, function() { renderItineraryView(); });
+          }).saveItineraryItem({
+            tripName: trip.name, planId: newId, date: dateVal, time: timeVal,
+            place: placeVal, localName: localVal, mapUrl: urlVal, note: noteVal, estCost: costVal
+          });
+        }
+      }
+
+      function toggleItinVisited(planId, isVisited) {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var items = (appData.tripItineraries && appData.tripItineraries[trip.name]) ? appData.tripItineraries[trip.name] : [];
+        var target = items.find(function(x) { return x.id.toString() === planId.toString(); });
+        if (target) target.visited = isVisited;
+        saveLightTextCache(appData);
+        renderItineraryView();
+        renderHomeDashboard();
+
+        google.script.run.toggleItineraryVisited({ tripName: trip.name, planId: planId, visited: isVisited });
+      }
+
+      function removeItinItem(planId) {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        if (!confirm("ต้องการลบจุดหมายนี้ออกจากแผนเที่ยวใช่หรือไม่?")) return;
+        if (appData.tripItineraries && appData.tripItineraries[trip.name]) {
+          appData.tripItineraries[trip.name] = appData.tripItineraries[trip.name].filter(function(x) { return x.id.toString() !== planId.toString(); });
+        }
+        saveLightTextCache(appData);
+        renderItineraryView();
+        renderHomeDashboard();
+
+        google.script.run.deleteItineraryItem({ tripName: trip.name, planId: planId });
+      }
+
+      function logExpenseFromItinBtn(btn) {
+        var dt = btn.getAttribute('data-date') || getLocalTodayStr();
+        var place = btn.getAttribute('data-place') || "";
+        var cost = parseFloat(btn.getAttribute('data-cost')) || 0;
+        switchTab('Expense');
+        document.getElementById('date').value = dt;
+        document.getElementById('description').value = place;
+        if (cost > 0) document.getElementById('amount').value = cost;
+        updateRateUI();
+      }
+
+      function openMultiMapFromBtn(btn) {
+        activeMapPlace = btn.getAttribute('data-place') || "";
+        var localName = btn.getAttribute('data-local') || "";
+        activeMapDirectUrl = btn.getAttribute('data-url') || "";
+        activeMapQuery = localName ? localName : activeMapPlace;
+
+        document.getElementById('mapModalPlaceTitle').innerText = activeMapPlace;
+        document.getElementById('mapModalQuerySub').innerText = localName ? ("คำค้นหา: " + localName) : ("คำค้นหา: " + activeMapPlace);
+
+        var directWrap = document.getElementById('mapDirectLinkWrap');
+        var directBtn = document.getElementById('mapDirectLinkBtn');
+        if (activeMapDirectUrl) {
+          directBtn.href = activeMapDirectUrl;
+          directWrap.style.display = "block";
+        } else {
+          directWrap.style.display = "none";
+        }
+        showModalAtViewport('multiMapModal');
+      }
+
+      function closeMultiMapModal() {
+        document.getElementById('multiMapModal').style.display = 'none';
+      }
+
+      function launchExternalMap(provider) {
+        var q = encodeURIComponent(activeMapQuery || activeMapPlace);
+        var url = "";
+        if (provider === 'naver') {
+          url = "https://map.naver.com/v5/search/" + q;
+        } else if (provider === 'kakao') {
+          url = "https://map.kakao.com/?q=" + q;
+        } else if (provider === 'apple') {
+          url = "https://maps.apple.com/?q=" + q;
+        } else {
+          url = "https://www.google.com/maps/search/?api=1&query=" + q;
+        }
+        window.open(url, "_blank", "noopener");
+      }
+
+      function copyMapSearchQuery() {
+        var text = activeMapQuery || activeMapPlace;
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function() {
+            alert("📋 คัดลอก '" + text + "' แล้ว! นำไปวางใน Amap / Naver / Grab ได้เลย");
+          });
+        } else {
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          alert("📋 คัดลอก '" + text + "' แล้ว!");
+        }
+      }
     </script>
 
     <script>
-      var appData = { trips: [], rates: [], fundBalances: {}, tripNotes: {}, tripTodos: {} };
+      var appData = { trips: [], rates: [], fundBalances: {}, tripNotes: {}, tripTodos: {}, tripItineraries: {} };
+      var APP_TEXT_CACHE_KEY = "trip_planner_light_cache_v1";
+      var selectedItinDate = "";
+      var activeMapPlace = "";
+      var activeMapQuery = "";
+      var activeMapDirectUrl = "";
+
+      function saveLightTextCache(data) {
+        try {
+          if (!data || !data.trips) return;
+          var compact = {
+            savedAt: new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit'}),
+            trips: data.trips,
+            rates: data.rates,
+            fundBalances: data.fundBalances,
+            tripNotes: data.tripNotes,
+            tripTodos: data.tripTodos,
+            tripItineraries: data.tripItineraries || {},
+            tripStats: data.tripStats || {},
+            recentHistoryByTrip: data.recentHistoryByTrip || {}
+          };
+          localStorage.setItem(APP_TEXT_CACHE_KEY, JSON.stringify(compact));
+        } catch (e) {}
+      }
+
+      function loadLightTextCache() {
+        try {
+          var raw = localStorage.getItem(APP_TEXT_CACHE_KEY);
+          return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+      }
       var selectedTripName = null;
       var cachedPersonData = null;
       var cachedFullHistory = [];
@@ -1303,12 +1837,32 @@
       }
 
       function loadAppData(keepCurrentView, callback) {
+        var cached = loadLightTextCache();
+        if (cached && cached.trips && cached.trips.length > 0 && !keepCurrentView && typeof callback !== 'function') {
+          appData = cached;
+          document.getElementById('loader').style.display = 'none';
+          renderTripList();
+          var activeCached = (appData.trips || []).filter(function(t) { return t.status === "กำลังเที่ยว"; });
+          if (activeCached.length > 0) {
+            selectTripByName(activeCached[0].name);
+          }
+        }
+
         google.script.run
           .withFailureHandler(function(err) {
+            if (cached && cached.trips && cached.trips.length > 0) {
+              document.getElementById('loader').style.display = 'none';
+              var stEl = document.getElementById('itinCacheStatus');
+              if (stEl) stEl.innerText = "📴 โหมดออฟไลน์ (ข้อมูลเมื่อ " + (cached.savedAt || "ล่าสุด") + ")";
+              return;
+            }
             document.getElementById('loader').innerHTML = "<b style='color:red;'>❌ โหลดข้อมูลล้มเหลว: " + err.message + "</b>";
           })
           .withSuccessHandler(function(data) {
             appData = data;
+            saveLightTextCache(data);
+            var stEl = document.getElementById('itinCacheStatus');
+            if (stEl) stEl.innerText = "🟢 ซิงก์ล่าสุด " + new Date().toLocaleTimeString('th-TH', {hour: '2-digit', minute: '2-digit'});
             document.getElementById('loader').style.display = 'none';
             renderTripList();
 
@@ -1380,6 +1934,44 @@
             noteCard.style.display = "block";
           } else {
             noteCard.style.display = "none";
+          }
+        }
+
+        // 1.5 Today's Itinerary
+        var allItins = (appData.tripItineraries && appData.tripItineraries[trip.name]) ? appData.tripItineraries[trip.name].slice() : [];
+        var homeItinEl = document.getElementById('homeTodayItinList');
+        var homeItinTitleEl = document.getElementById('homeTodayItinTitle');
+        if (homeItinEl) {
+          if (allItins.length === 0) {
+            if (homeItinTitleEl) homeItinTitleEl.innerText = "🗺️ แผนเที่ยว";
+            homeItinEl.innerHTML = "<div style='text-align:center; padding:8px 0;'><span style='font-size:12px; color:#888;'>ยังไม่มีแผนเที่ยว </span><button type='button' onclick=\"switchTab('Itinerary'); openAddItinModal();\" style='background:#ECFDF5; color:#3E7B5D; border:none; border-radius:8px; padding:4px 10px; font-size:11px; font-weight:bold; cursor:pointer;'>+ เพิ่มเลย</button></div>";
+          } else {
+            var todayStr = getLocalTodayStr();
+            var uniqueDates = Array.from(new Set(allItins.map(function(x) { return x.date; }))).sort();
+            var targetDate = uniqueDates.indexOf(todayStr) !== -1 ? todayStr : uniqueDates[0];
+            var dayNum = uniqueDates.indexOf(targetDate) + 1;
+            if (homeItinTitleEl) {
+              homeItinTitleEl.innerText = (targetDate === todayStr) ? ("🗺️ แผนเที่ยววันนี้ (Day " + dayNum + ")") : ("🗺️ แผนเที่ยว Day " + dayNum + " (" + formatThaiShortDate(targetDate) + ")");
+            }
+            var dayItems = allItins.filter(function(x) { return x.date === targetDate; }).sort(function(a, b) { return (a.time || "").localeCompare(b.time || ""); });
+            var hItinHtml = "";
+            dayItems.slice(0, 3).forEach(function(item) {
+              hItinHtml += `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#FCFBF8; border-radius:10px; margin-bottom:6px; gap:8px; ${item.visited ? 'opacity:0.6;' : ''}">
+                  <div style="min-width:0; flex:1;">
+                    <div style="font-size:13px; font-weight:600; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; ${item.visited ? 'text-decoration:line-through;' : ''}">
+                      <span style="color:#3E7B5D; font-weight:700;">${item.time || '--:--'}</span> ${item.place}
+                    </div>
+                    ${item.note ? '<div style="font-size:11px; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + item.note + '</div>' : ''}
+                  </div>
+                  <button type="button" data-place="${escapeAttr(item.place)}" data-local="${escapeAttr(item.localName)}" data-url="${escapeAttr(item.mapUrl)}" onclick="openMultiMapFromBtn(this)" style="background:#ECFDF5; color:#3E7B5D; border:none; border-radius:8px; padding:6px 10px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap; flex-shrink:0;">📍 นำทาง</button>
+                </div>
+              `;
+            });
+            if (dayItems.length > 3) {
+              hItinHtml += `<div style="text-align:center; font-size:11px; color:#888; margin-top:4px;">+ อีก ${dayItems.length - 3} จุดหมายในวันนี้</div>`;
+            }
+            homeItinEl.innerHTML = hItinHtml;
           }
         }
 
@@ -1715,7 +2307,7 @@
       }
 
       function switchTab(type) {
-        ['homeDashboardWrapper', 'mainFormWrapper', 'prePostWrapper', 'summaryFormWrapper', 'todoFormWrapper', 'settingsFormWrapper', 'rateAlertBox'].forEach(function(id) {
+        ['homeDashboardWrapper', 'mainFormWrapper', 'prePostWrapper', 'summaryFormWrapper', 'todoFormWrapper', 'settingsFormWrapper', 'itineraryFormWrapper', 'rateAlertBox'].forEach(function(id) {
           var el = document.getElementById(id);
           if (el) el.style.display = "none";
         });
@@ -1757,6 +2349,12 @@
           if (subEl) subEl.innerText = "เช็คลิสต์ & โน้ต";
           document.getElementById('todoFormWrapper').style.display = "block";
           switchTodoSubTab('TodoList');
+        } else if (type === 'Itinerary') {
+          updateBottomNavActive('bnavMore');
+          if (titleEl) titleEl.innerText = "🗺️ แผนเที่ยว (รายวัน)";
+          if (subEl) subEl.innerText = "Itinerary & Navigation";
+          document.getElementById('itineraryFormWrapper').style.display = "block";
+          renderItineraryView();
         } else if (type === 'Settings') {
           updateBottomNavActive('bnavMore');
           if (titleEl) titleEl.innerText = "🧳 จัดการทริป";
