@@ -1385,6 +1385,50 @@
         window.google.script.run = createRunner(null, null);
       })();
 
+      function formatItinTime(rawTime) {
+        if (!rawTime) return "";
+        var str = String(rawTime).trim();
+        var match = str.match(/(\d{1,2}):(\d{2})(?::\d{2})?/);
+        if (match) {
+          var hh = match[1].padStart(2, '0');
+          var mm = match[2];
+          return hh + ":" + mm;
+        }
+        return str;
+      }
+
+      function formatItinDate(rawDate) {
+        if (!rawDate) return "";
+        var str = String(rawDate).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+        var isoMatch = str.match(/^(\d{4}-\d{2}-\d{2})T/);
+        if (isoMatch) return isoMatch[1];
+        var d = new Date(str);
+        if (!isNaN(d.getTime())) {
+          var y = d.getFullYear();
+          var m = String(d.getMonth() + 1).padStart(2, '0');
+          var day = String(d.getDate()).padStart(2, '0');
+          return y + '-' + m + '-' + day;
+        }
+        return str;
+      }
+
+      function getCleanItinItems(tripName) {
+        var raw = (appData.tripItineraries && appData.tripItineraries[tripName]) ? appData.tripItineraries[tripName] : [];
+        var seenIds = {};
+        var clean = [];
+        raw.forEach(function(item) {
+          var idKey = String(item.id || "");
+          if (idKey && seenIds[idKey]) return;
+          if (idKey) seenIds[idKey] = true;
+          var copy = Object.assign({}, item);
+          copy.date = formatItinDate(copy.date);
+          copy.time = formatItinTime(copy.time);
+          clean.push(copy);
+        });
+        return clean;
+      }
+
       function formatThaiShortDate(dateStr) {
         if (!dateStr || dateStr.indexOf('-') === -1) return dateStr || "";
         var months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
@@ -1398,7 +1442,7 @@
       function renderItineraryView() {
         var trip = getCurrentTrip();
         if (!trip) return;
-        var items = (appData.tripItineraries && appData.tripItineraries[trip.name]) ? appData.tripItineraries[trip.name].slice() : [];
+        var items = getCleanItinItems(trip.name);
         var pillsContainer = document.getElementById('itinDayPills');
         var timelineContainer = document.getElementById('itinTimelineContainer');
         var dayTitleEl = document.getElementById('itinSelectedDayTitle');
@@ -1510,8 +1554,8 @@
 
         document.getElementById('itinModalTitle').innerText = "✏️ แก้ไขแผนเที่ยว";
         document.getElementById('itinPlanId').value = item.id;
-        document.getElementById('itinDateInput').value = item.date;
-        document.getElementById('itinTimeInput').value = item.time || "09:30";
+        document.getElementById('itinDateInput').value = formatItinDate(item.date);
+        document.getElementById('itinTimeInput').value = formatItinTime(item.time) || "09:30";
         document.getElementById('itinPlaceInput').value = item.place || "";
         document.getElementById('itinLocalNameInput').value = item.localName || "";
         document.getElementById('itinMapUrlInput').value = item.mapUrl || "";
@@ -1540,6 +1584,7 @@
         var noteVal = document.getElementById('itinNoteInput').value.trim();
 
         var btn = document.getElementById('btnSaveItin');
+        if (btn.disabled) return;
         btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
 
         selectedItinDate = dateVal;
@@ -1942,7 +1987,7 @@
         }
 
         // 1.5 Today's Itinerary
-        var allItins = (appData.tripItineraries && appData.tripItineraries[trip.name]) ? appData.tripItineraries[trip.name].slice() : [];
+        var allItins = getCleanItinItems(trip.name);
         var homeItinEl = document.getElementById('homeTodayItinList');
         var homeItinTitleEl = document.getElementById('homeTodayItinTitle');
         if (homeItinEl) {
