@@ -686,13 +686,18 @@
             </div>
           </div>
 
-          <!-- Today's Itinerary Card on Dashboard -->
+          <!-- Today's Itinerary & Saved Places Card on Dashboard -->
           <div id="homeTodayItinCard" style="background: #fff; border-radius: 16px; padding: 15px 18px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
               <span style="font-size:13px; font-weight:bold; color:#333;" id="homeTodayItinTitle">🗺️ แผนเที่ยววันนี้</span>
-              <button type="button" onclick="switchTab('Itinerary')" style="background:none; border:none; color:#3E7B5D; font-size:11px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">ดูตารางเต็ม ➔</button>
+              <button type="button" onclick="switchTab('Itinerary'); switchItinSubTab('Plan');" style="background:none; border:none; color:#3E7B5D; font-size:11px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">ดูตารางเต็ม ➔</button>
             </div>
+            <div id="homeHotelQuickStrip" style="display:none; margin-bottom:10px;"></div>
             <div id="homeTodayItinList"></div>
+            <div style="display:flex; gap:8px; margin-top:10px; padding-top:10px; border-top:1px solid #F2ECE4;">
+              <button type="button" onclick="switchTab('Itinerary'); switchItinSubTab('Hotel');" style="flex:1; background:#FAF9F5; border:1px solid #EAE6DF; border-radius:10px; padding:8px; font-size:12px; font-weight:600; color:#333; cursor:pointer;">🏨 ที่พัก (<span id="homeHotelCount">0</span>)</button>
+              <button type="button" onclick="switchTab('Itinerary'); switchItinSubTab('Spots');" style="flex:1; background:#FAF9F5; border:1px solid #EAE6DF; border-radius:10px; padding:8px; font-size:12px; font-weight:600; color:#333; cursor:pointer;">🍜 ร้าน & ของฝาก (<span id="homeSpotsCount">0</span>)</button>
+            </div>
           </div>
 
           <div id="homePendingTodoCard" style="background: #fff; border-radius: 16px; padding: 15px 18px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
@@ -929,30 +934,61 @@
           </div>
         </div>
 
-        <!-- Itinerary Wrapper (แผนเที่ยวรายวัน) -->
+        <!-- Itinerary & Saved Places Wrapper (แผนเที่ยว & พิกัดสำคัญ) -->
         <div id="itineraryFormWrapper" style="display:none;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:8px;">
-            <div style="font-size:12px; color:#666;" id="itinCacheStatus">⚡ พร้อมใช้งานแม้ออฟไลน์</div>
-            <button type="button" onclick="openAddItinModal()" style="background:#3E7B5D; color:#fff; border:none; border-radius:10px; padding:8px 14px; font-size:12px; font-weight:bold; cursor:pointer; white-space:nowrap;">➕ เพิ่มจุดหมาย</button>
+          <!-- Sub-tabs: แผนรายวัน / ที่พัก / ร้านเด็ด & ของฝาก -->
+          <div class="sub-tabs" style="margin-bottom:12px;">
+            <div class="sub-tab-btn active" id="subTabItinPlan" onclick="switchItinSubTab('Plan')">🗓️ แผนรายวัน</div>
+            <div class="sub-tab-btn" id="subTabItinHotel" onclick="switchItinSubTab('Hotel')">🏨 ที่พัก</div>
+            <div class="sub-tab-btn" id="subTabItinSpots" onclick="switchItinSubTab('Spots')">🍜 ร้าน & ของฝาก</div>
           </div>
 
-          <!-- Day Selector Pills -->
-          <div id="itinDayPills" class="day-pills-bar"></div>
+          <!-- Sub-view 1: แผนรายวัน -->
+          <div id="viewItinPlan">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:8px;">
+              <div style="font-size:12px; color:#666;" id="itinCacheStatus">⚡ พร้อมใช้งานแม้ออฟไลน์</div>
+              <button type="button" onclick="openAddItinModal('plan')" style="background:#3E7B5D; color:#fff; border:none; border-radius:10px; padding:8px 14px; font-size:12px; font-weight:bold; cursor:pointer; white-space:nowrap;">➕ เพิ่มจุดหมาย</button>
+            </div>
 
-          <!-- Daily Summary Strip -->
-          <div id="itinDaySummaryCard" style="background:#fff; border:1px solid #EAE6DF; border-radius:14px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            <div>
-              <div style="font-size:13px; font-weight:700; color:#222;" id="itinSelectedDayTitle">วันที่เลือก</div>
-              <div style="font-size:11px; color:#777; margin-top:2px;" id="itinSelectedDayMeta">0 สถานที่</div>
+            <!-- Day Selector Pills -->
+            <div id="itinDayPills" class="day-pills-bar"></div>
+
+            <!-- Daily Summary Strip (ตัดงบประมาณออกแล้ว) -->
+            <div id="itinDaySummaryCard" style="background:#fff; border:1px solid #EAE6DF; border-radius:14px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div>
+                <div style="font-size:13px; font-weight:700; color:#222;" id="itinSelectedDayTitle">วันที่เลือก</div>
+                <div style="font-size:11px; color:#777; margin-top:2px;" id="itinSelectedDayMeta">0 สถานที่</div>
+              </div>
+              <div id="itinSelectedDayBadge" style="background:#ECFDF5; color:#3E7B5D; font-size:11px; font-weight:700; padding:5px 10px; border-radius:10px;">0/0 จุด</div>
             </div>
-            <div style="text-align:right;">
-              <div style="font-size:10px; color:#888;">งบประมาณวันนี้</div>
-              <div style="font-size:14px; font-weight:bold; color:#3E7B5D;" id="itinSelectedDayBudget">0</div>
-            </div>
+
+            <!-- Timeline List -->
+            <div id="itinTimelineContainer" class="itin-timeline"></div>
           </div>
 
-          <!-- Timeline List -->
-          <div id="itinTimelineContainer" class="itin-timeline"></div>
+          <!-- Sub-view 2: ที่พัก / โรงแรม -->
+          <div id="viewItinHotel" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:8px;">
+              <div style="font-size:12px; color:#666;">🏨 ข้อมูลโรงแรม & นำทางกลับที่พัก</div>
+              <button type="button" onclick="openAddItinModal('hotel')" style="background:#3E7B5D; color:#fff; border:none; border-radius:10px; padding:8px 14px; font-size:12px; font-weight:bold; cursor:pointer; white-space:nowrap;">➕ เพิ่มที่พัก</button>
+            </div>
+            <div id="itinHotelListContainer"></div>
+          </div>
+
+          <!-- Sub-view 3: ร้านอาหาร / คาเฟ่ / ร้านของฝากในลิสต์ -->
+          <div id="viewItinSpots" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; gap:8px;">
+              <div style="font-size:12px; color:#666;">📌 ร้านอาหาร คาเฟ่ & ของฝากที่ปักหมุดไว้</div>
+              <button type="button" onclick="openAddItinModal('food')" style="background:#3E7B5D; color:#fff; border:none; border-radius:10px; padding:8px 14px; font-size:12px; font-weight:bold; cursor:pointer; white-space:nowrap;">➕ เพิ่มร้าน</button>
+            </div>
+            <!-- Filter Pills -->
+            <div style="display:flex; gap:6px; margin-bottom:12px; overflow-x:auto; padding-bottom:2px;">
+              <button type="button" class="day-pill active" id="spotFilterAll" onclick="setSpotFilter('all')" style="padding:6px 12px; font-size:11px;">ทั้งหมด</button>
+              <button type="button" class="day-pill" id="spotFilterFood" onclick="setSpotFilter('food')" style="padding:6px 12px; font-size:11px;">🍜 ร้านอาหาร/คาเฟ่</button>
+              <button type="button" class="day-pill" id="spotFilterShop" onclick="setSpotFilter('shop')" style="padding:6px 12px; font-size:11px;">🛍️ ของฝาก/ช้อปปิ้ง</button>
+            </div>
+            <div id="itinSpotsListContainer"></div>
+          </div>
         </div>
 
       </div>
@@ -1135,35 +1171,59 @@
         <button type="button" onclick="closeQuickCalcModal()" style="width:100%; background:#333; color:#fff; border:none; border-radius:12px; padding:12px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">เสร็จสิ้น</button>
       </div>
     </div>
-    <!-- Modal เพิ่ม/แก้ไขรายการแผนเที่ยว (Itinerary) -->
+    <!-- Modal เพิ่ม/แก้ไขรายการแผนเที่ยว & พิกัด (Itinerary / Hotel / Spots) -->
     <div id="itinFormModal" class="modal-overlay" onclick="if(event.target===this) closeItinFormModal()">
       <div class="modal-content box-card" onclick="event.stopPropagation()" style="background:#fff;">
         <div class="modal-header">
-          <div style="font-weight:bold; font-size:16px; color:#222;" id="itinModalTitle">🗺️ เพิ่มแผนเที่ยว</div>
+          <div style="font-weight:bold; font-size:16px; color:#222;" id="itinModalTitle">🗺️ เพิ่มจุดหมาย</div>
           <button class="close-modal" onclick="closeItinFormModal()">✕</button>
         </div>
         <form onsubmit="submitItineraryForm(event)">
           <input type="hidden" id="itinPlanId">
-          <div class="row-2">
-            <div><label>วันที่</label><input type="date" id="itinDateInput" required></div>
-            <div><label>เวลา (เช่น 09:30)</label><input type="time" id="itinTimeInput" value="09:00"></div>
-          </div>
-          <label>ชื่อสถานที่ / กิจกรรม</label>
-          <input type="text" id="itinPlaceInput" placeholder="เช่น พระราชวังเคียงบกกุง / คาเฟ่ยอนนัมดง" required>
 
-          <label>ชื่อภาษาท้องถิ่น / คำค้นหาแผนที่ (ไม่บังคับ)</label>
-          <input type="text" id="itinLocalNameInput" placeholder="เช่น 경복궁 หรือ สถานีรถไฟ (ใช้ค้นหาใน Naver/Amap)">
+          <label>ประเภทข้อมูล</label>
+          <div class="chip-group" style="margin-bottom:14px;">
+            <div class="chip-item" style="min-width:calc(50% - 4px);">
+              <input type="radio" id="itinCatPlan" name="itinCategoryChoice" value="plan" checked onchange="onItinCategoryChange()">
+              <label class="chip-label" for="itinCatPlan">🗓️ แผนเที่ยวรายวัน</label>
+            </div>
+            <div class="chip-item" style="min-width:calc(50% - 4px);">
+              <input type="radio" id="itinCatHotel" name="itinCategoryChoice" value="hotel" onchange="onItinCategoryChange()">
+              <label class="chip-label" for="itinCatHotel">🏨 ที่พัก / โรงแรม</label>
+            </div>
+            <div class="chip-item" style="min-width:calc(50% - 4px);">
+              <input type="radio" id="itinCatFood" name="itinCategoryChoice" value="food" onchange="onItinCategoryChange()">
+              <label class="chip-label" for="itinCatFood">🍜 ร้านอาหาร / คาเฟ่</label>
+            </div>
+            <div class="chip-item" style="min-width:calc(50% - 4px);">
+              <input type="radio" id="itinCatShop" name="itinCategoryChoice" value="shop" onchange="onItinCategoryChange()">
+              <label class="chip-label" for="itinCatShop">🛍️ ของฝาก / ช้อปปิ้ง</label>
+            </div>
+          </div>
+
+          <div id="itinDateTimeRow" class="row-2">
+            <div><label>วันที่</label><input type="date" id="itinDateInput"></div>
+            <div><label>เวลา (เช่น 09:30)</label><input type="time" id="itinTimeInput" value="09:30"></div>
+          </div>
+
+          <div id="itinHotelDatesRow" class="row-2" style="display:none;">
+            <div><label>วันเช็คอิน (ไม่บังคับ)</label><input type="date" id="itinCheckInInput"></div>
+            <div><label>วันเช็คเอาท์ (ไม่บังคับ)</label><input type="date" id="itinCheckOutInput"></div>
+          </div>
+
+          <label id="itinPlaceLabel">ชื่อสถานที่ / กิจกรรม</label>
+          <input type="text" id="itinPlaceInput" placeholder="เช่น พระราชวังเคียงบกกุง" required>
+
+          <label id="itinLocalLabel">ชื่อภาษาท้องถิ่น / ที่อยู่ (สำหรับค้นหาแผนที่หรือให้แท็กซี่)</label>
+          <input type="text" id="itinLocalNameInput" placeholder="เช่น 경복궁 หรือ ที่อยู่โรงแรมภาษาเกาหลี/จีน">
 
           <label>ลิงก์แผนที่โดยตรง (ไม่บังคับ)</label>
           <input type="url" id="itinMapUrlInput" placeholder="วางลิงก์ Naver Map / Apple Maps / Google Maps">
 
-          <label>งบประมาณโดยประมาณ (<span id="itinEstCurrLabel">THB</span>)</label>
-          <input type="number" id="itinEstCostInput" step="0.01" placeholder="0.00">
+          <label id="itinNoteLabel">รายละเอียด / โน้ตหน้างาน</label>
+          <textarea id="itinNoteInput" style="min-height:75px;" placeholder="เช่น ทางออก 5, รหัสจองโรงแรม, เมนูแนะนำ, ของฝากที่ต้องซื้อ"></textarea>
 
-          <label>รายละเอียด / โน้ตหน้างาน</label>
-          <textarea id="itinNoteInput" style="min-height:70px;" placeholder="เช่น ทางออก 5, รอบเข้าชม 10:00 น., เมนูแนะนำ"></textarea>
-
-          <button type="submit" class="submit-btn" id="btnSaveItin" style="background:#3E7B5D;">💾 บันทึกแผนเที่ยว</button>
+          <button type="submit" class="submit-btn" id="btnSaveItin" style="background:#3E7B5D;">💾 บันทึกข้อมูล</button>
         </form>
       </div>
     </div>
@@ -1218,8 +1278,8 @@
         <div class="quick-action-grid">
           <div class="qa-btn" onclick="closeQuickActionModal(); switchTab('Itinerary');" style="border-color:#CBE4D6; background:#F4FBF7;">
             <span class="qa-icon">🗺️</span>
-            <span class="qa-title" style="color:#2D5E46;">แผนเที่ยว (รายวัน)</span>
-            <span class="qa-sub">ตารางเวลา & นำทาง</span>
+            <span class="qa-title" style="color:#2D5E46;">แผนเที่ยว & พิกัด</span>
+            <span class="qa-sub">รายวัน / ที่พัก / ร้านเด็ด</span>
           </div>
           <div class="qa-btn" onclick="closeQuickActionModal(); switchTab('Expense');">
             <span class="qa-icon">💸</span>
@@ -1413,6 +1473,17 @@
         return str;
       }
 
+      var activeItinSubTab = 'Plan';
+      var activeSpotFilter = 'all';
+
+      function normalizeItinCategory(rawCat) {
+        var c = String(rawCat || "").trim().toLowerCase();
+        if (c === 'hotel' || c === 'ที่พัก' || c === 'โรงแรม') return 'hotel';
+        if (c === 'food' || c === 'ร้านอาหาร' || c === 'คาเฟ่') return 'food';
+        if (c === 'shop' || c === 'ของฝาก' || c === 'ช้อปปิ้ง') return 'shop';
+        return 'plan';
+      }
+
       function getCleanItinItems(tripName) {
         var raw = (appData.tripItineraries && appData.tripItineraries[tripName]) ? appData.tripItineraries[tripName] : [];
         var seenIds = {};
@@ -1424,6 +1495,7 @@
           var copy = Object.assign({}, item);
           copy.date = formatItinDate(copy.date);
           copy.time = formatItinTime(copy.time);
+          copy.category = normalizeItinCategory(copy.category);
           clean.push(copy);
         });
         return clean;
@@ -1439,27 +1511,57 @@
         return d + " " + (months[m] || parts[1]);
       }
 
+      function switchItinSubTab(sub) {
+        activeItinSubTab = sub;
+        ['Plan', 'Hotel', 'Spots'].forEach(function(name) {
+          var tabEl = document.getElementById('subTabItin' + name);
+          var viewEl = document.getElementById('viewItin' + name);
+          if (tabEl) tabEl.className = (name === sub) ? "sub-tab-btn active" : "sub-tab-btn";
+          if (viewEl) viewEl.style.display = (name === sub) ? "block" : "none";
+        });
+        renderItineraryView();
+      }
+
+      function setSpotFilter(filterVal) {
+        activeSpotFilter = filterVal;
+        ['All', 'Food', 'Shop'].forEach(function(k) {
+          var btn = document.getElementById('spotFilter' + k);
+          if (btn) btn.className = (k.toLowerCase() === filterVal) ? "day-pill active" : "day-pill";
+        });
+        renderSpotsSubView();
+      }
+
       function renderItineraryView() {
         var trip = getCurrentTrip();
         if (!trip) return;
-        var items = getCleanItinItems(trip.name);
+        var allItems = getCleanItinItems(trip.name);
+
+        if (activeItinSubTab === 'Hotel') {
+          renderHotelSubView(allItems);
+          return;
+        }
+        if (activeItinSubTab === 'Spots') {
+          renderSpotsSubView(allItems);
+          return;
+        }
+
+        var items = allItems.filter(function(x) { return x.category === 'plan'; });
         var pillsContainer = document.getElementById('itinDayPills');
         var timelineContainer = document.getElementById('itinTimelineContainer');
         var dayTitleEl = document.getElementById('itinSelectedDayTitle');
         var dayMetaEl = document.getElementById('itinSelectedDayMeta');
-        var dayBudgetEl = document.getElementById('itinSelectedDayBudget');
-        var curr = trip.defaultCurrency || 'THB';
+        var dayBadgeEl = document.getElementById('itinSelectedDayBadge');
 
         if (items.length === 0) {
           pillsContainer.innerHTML = "";
-          dayTitleEl.innerText = "ยังไม่มีแผนเที่ยว";
-          dayMetaEl.innerText = "กดปุ่ม '+ เพิ่มจุดหมาย' ด้านบนเพื่อเริ่มวางแผนรายวัน";
-          dayBudgetEl.innerText = "0 " + curr;
-          timelineContainer.innerHTML = "<div style='background:#fff; border-radius:16px; padding:24px; text-align:center; color:#888; font-size:13px; border:1px dashed #ddd;'>🗺️ ยังไม่มีรายการในแผนเที่ยว<br><button type='button' onclick='openAddItinModal()' style='margin-top:12px; background:#3E7B5D; color:#fff; border:none; border-radius:10px; padding:10px 16px; font-size:13px; font-weight:bold; cursor:pointer;'>➕ เพิ่มจุดหมายแรก</button></div>";
+          dayTitleEl.innerText = "ยังไม่มีแผนเที่ยวรายวัน";
+          dayMetaEl.innerText = "กดปุ่ม '+ เพิ่มจุดหมาย' ด้านบนเพื่อเริ่มวางแผน";
+          if (dayBadgeEl) dayBadgeEl.innerText = "0 จุดหมาย";
+          timelineContainer.innerHTML = "<div style='background:#fff; border-radius:16px; padding:24px; text-align:center; color:#888; font-size:13px; border:1px dashed #ddd;'>🗺️ ยังไม่มีรายการในแผนเที่ยวรายวัน<br><button type='button' onclick=\"openAddItinModal('plan')\" style='margin-top:12px; background:#3E7B5D; color:#fff; border:none; border-radius:10px; padding:10px 16px; font-size:13px; font-weight:bold; cursor:pointer;'>➕ เพิ่มจุดหมายแรก</button></div>";
           return;
         }
 
-        var uniqueDates = Array.from(new Set(items.map(function(x) { return x.date; }))).sort();
+        var uniqueDates = Array.from(new Set(items.map(function(x) { return x.date; }).filter(Boolean))).sort();
         var todayStr = getLocalTodayStr();
         if (!selectedItinDate || uniqueDates.indexOf(selectedItinDate) === -1) {
           selectedItinDate = uniqueDates.indexOf(todayStr) !== -1 ? todayStr : uniqueDates[0];
@@ -1479,16 +1581,12 @@
         });
 
         var visitedCount = dayItems.filter(function(x) { return x.visited; }).length;
-        var dayBudget = 0;
-        dayItems.forEach(function(x) { dayBudget += (parseFloat(x.estCost) || 0); });
-
         dayTitleEl.innerText = "Day " + dayIndex + " • " + formatThaiShortDate(selectedItinDate) + (selectedItinDate === todayStr ? " (วันนี้)" : "");
-        dayMetaEl.innerText = dayItems.length + " จุดหมาย • ไปแล้ว " + visitedCount + "/" + dayItems.length;
-        dayBudgetEl.innerText = dayBudget.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 2}) + " " + curr;
+        dayMetaEl.innerText = "ตารางเดินทางทั้งหมด " + dayItems.length + " สถานที่";
+        if (dayBadgeEl) dayBadgeEl.innerText = "ไปแล้ว " + visitedCount + "/" + dayItems.length;
 
         var tlHtml = "";
         dayItems.forEach(function(it) {
-          var costBadge = it.estCost > 0 ? `<span style="background:#FEF9E7; color:#B7950B; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:600;">งบ ~${it.estCost.toLocaleString('en-US')} ${curr}</span>` : "";
           var localSub = it.localName ? `<div style="font-size:12px; color:#3E7B5D; margin-top:2px;">🏷️ ${it.localName}</div>` : "";
           var noteSub = it.note ? `<div style="font-size:12px; color:#666; background:#FAF9F5; padding:8px 10px; border-radius:10px; margin-top:8px; white-space:pre-line; line-height:1.4;">${it.note}</div>` : "";
 
@@ -1498,9 +1596,8 @@
                 <div style="display:flex; align-items:flex-start; gap:8px; flex:1; min-width:0;">
                   <input type="checkbox" ${it.visited ? 'checked' : ''} onchange="toggleItinVisited('${it.id}', this.checked)" style="width:18px; height:18px; margin-top:2px; cursor:pointer; accent-color:#3E7B5D; flex-shrink:0;">
                   <div style="min-width:0; flex:1;">
-                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:2px;">
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-bottom:3px;">
                       <span style="background:#ECFDF5; color:#3E7B5D; font-weight:700; font-size:12px; padding:2px 8px; border-radius:8px;">⏰ ${it.time || '--:--'}</span>
-                      ${costBadge}
                     </div>
                     <div style="font-size:15px; font-weight:700; color:#222; ${it.visited ? 'text-decoration:line-through;' : ''}">${it.place}</div>
                     ${localSub}
@@ -1511,7 +1608,7 @@
               <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top:10px; padding-top:10px; border-top:1px solid #F2ECE4; flex-wrap:wrap;">
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
                   <button type="button" data-place="${escapeAttr(it.place)}" data-local="${escapeAttr(it.localName)}" data-url="${escapeAttr(it.mapUrl)}" onclick="openMultiMapFromBtn(this)" style="background:#ECFDF5; color:#2D5E46; border:1px solid #CBE4D6; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; cursor:pointer;">📍 นำทาง</button>
-                  <button type="button" data-date="${escapeAttr(it.date)}" data-place="${escapeAttr(it.place)}" data-cost="${it.estCost || 0}" onclick="logExpenseFromItinBtn(this)" style="background:#FAF9F5; color:#333; border:1px solid #EAE6DF; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:600; cursor:pointer;">💸 จ่ายเงิน</button>
+                  <button type="button" data-date="${escapeAttr(it.date)}" data-place="${escapeAttr(it.place)}" onclick="logExpenseFromItinBtn(this)" style="background:#FAF9F5; color:#333; border:1px solid #EAE6DF; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:600; cursor:pointer;">💸 จ่ายเงิน</button>
                 </div>
                 <div style="display:flex; gap:4px;">
                   <button type="button" data-id="${escapeAttr(it.id)}" onclick="openEditItinModal(this.getAttribute('data-id'))" class="clean-action-btn">✏️</button>
@@ -1524,44 +1621,242 @@
         timelineContainer.innerHTML = tlHtml;
       }
 
+      function renderHotelSubView(preloadedItems) {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var allItems = preloadedItems || getCleanItinItems(trip.name);
+        var hotels = allItems.filter(function(x) { return x.category === 'hotel'; });
+        var container = document.getElementById('itinHotelListContainer');
+        if (!container) return;
+
+        if (hotels.length === 0) {
+          container.innerHTML = "<div style='background:#fff; border-radius:16px; padding:24px; text-align:center; color:#888; font-size:13px; border:1px dashed #ddd;'>🏨 ยังไม่มีข้อมูลที่พักของทริป<br><button type='button' onclick=\"openAddItinModal('hotel')\" style='margin-top:12px; background:#3E7B5D; color:#fff; border:none; border-radius:10px; padding:10px 16px; font-size:13px; font-weight:bold; cursor:pointer;'>➕ เพิ่มโรงแรม / ที่พัก</button></div>";
+          return;
+        }
+
+        var html = "";
+        hotels.forEach(function(h) {
+          var dateBadge = "";
+          if (h.date || h.time) {
+            var inStr = h.date ? ("เช็คอิน: " + formatThaiShortDate(h.date)) : "";
+            var outStr = h.time ? (" • เช็คเอาท์: " + formatThaiShortDate(h.time)) : "";
+            dateBadge = `<div style="display:inline-block; background:#ECFDF5; color:#3E7B5D; font-size:11px; font-weight:600; padding:3px 9px; border-radius:8px; margin-bottom:6px;">🗓️ ${inStr}${outStr}</div>`;
+          }
+          var localSub = h.localName ? `<div style="font-size:12px; color:#3E7B5D; margin-top:3px; word-break:break-word;">📍 ${h.localName}</div>` : "";
+          var noteSub = h.note ? `<div style="font-size:12px; color:#555; background:#FAF9F5; padding:10px 12px; border-radius:10px; margin-top:8px; white-space:pre-line; line-height:1.45;">${h.note}</div>` : "";
+
+          html += `
+            <div style="background:#fff; border:1px solid #EAE6DF; border-radius:16px; padding:15px; margin-bottom:12px; box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+              ${dateBadge}
+              <div style="font-size:16px; font-weight:700; color:#222;">🏨 ${h.place}</div>
+              ${localSub}
+              ${noteSub}
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top:12px; padding-top:10px; border-top:1px solid #F2ECE4; flex-wrap:wrap;">
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  <button type="button" data-place="${escapeAttr(h.place)}" data-local="${escapeAttr(h.localName)}" data-url="${escapeAttr(h.mapUrl)}" onclick="openMultiMapFromBtn(this)" style="background:#3E7B5D; color:#fff; border:none; border-radius:8px; padding:7px 12px; font-size:12px; font-weight:700; cursor:pointer;">🧭 นำทางกลับโรงแรม</button>
+                  <button type="button" data-text="${escapeAttr(h.localName || h.place)}" onclick="copyQuickTextBtn(this)" style="background:#FAF9F5; color:#333; border:1px solid #EAE6DF; border-radius:8px; padding:7px 10px; font-size:12px; font-weight:600; cursor:pointer;">📋 ก๊อปปี้ชื่อ/ที่อยู่</button>
+                </div>
+                <div style="display:flex; gap:4px;">
+                  <button type="button" data-id="${escapeAttr(h.id)}" onclick="openEditItinModal(this.getAttribute('data-id'))" class="clean-action-btn">✏️</button>
+                  <button type="button" data-id="${escapeAttr(h.id)}" onclick="removeItinItem(this.getAttribute('data-id'))" class="clean-action-btn del">🗑️</button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+
+      function renderSpotsSubView(preloadedItems) {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var allItems = preloadedItems || getCleanItinItems(trip.name);
+        var spots = allItems.filter(function(x) { return x.category === 'food' || x.category === 'shop'; });
+        if (activeSpotFilter !== 'all') {
+          spots = spots.filter(function(x) { return x.category === activeSpotFilter; });
+        }
+        var container = document.getElementById('itinSpotsListContainer');
+        if (!container) return;
+
+        if (spots.length === 0) {
+          container.innerHTML = "<div style='background:#fff; border-radius:16px; padding:24px; text-align:center; color:#888; font-size:13px; border:1px dashed #ddd;'>📌 ยังไม่มีร้านอาหารหรือร้านของฝากในหมวดนี้<br><button type='button' onclick=\"openAddItinModal('food')\" style='margin-top:12px; background:#3E7B5D; color:#fff; border:none; border-radius:10px; padding:10px 16px; font-size:13px; font-weight:bold; cursor:pointer;'>➕ เพิ่มร้านในลิสต์</button></div>";
+          return;
+        }
+
+        spots.sort(function(a, b) {
+          if (a.visited === b.visited) return 0;
+          return a.visited ? 1 : -1;
+        });
+
+        var html = "";
+        spots.forEach(function(sp) {
+          var isShop = (sp.category === 'shop');
+          var catBadge = isShop
+            ? `<span style="background:#FEF9E7; color:#B7950B; font-size:11px; font-weight:700; padding:2px 8px; border-radius:8px;">🛍️ ของฝาก / ช้อปปิ้ง</span>`
+            : `<span style="background:#ECFDF5; color:#3E7B5D; font-size:11px; font-weight:700; padding:2px 8px; border-radius:8px;">🍜 ร้านอาหาร / คาเฟ่</span>`;
+          var localSub = sp.localName ? `<div style="font-size:12px; color:#3E7B5D; margin-top:2px;">🏷️ ${sp.localName}</div>` : "";
+          var noteSub = sp.note ? `<div style="font-size:12px; color:#666; background:#FAF9F5; padding:8px 10px; border-radius:10px; margin-top:8px; white-space:pre-line; line-height:1.4;">${sp.note}</div>` : "";
+
+          html += `
+            <div style="background:#fff; border:1px solid #EAE6DF; border-radius:16px; padding:14px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.02); ${sp.visited ? 'opacity:0.65;' : ''}">
+              <div style="display:flex; align-items:flex-start; gap:8px;">
+                <input type="checkbox" ${sp.visited ? 'checked' : ''} onchange="toggleItinVisited('${sp.id}', this.checked)" style="width:18px; height:18px; margin-top:2px; cursor:pointer; accent-color:#3E7B5D; flex-shrink:0;">
+                <div style="min-width:0; flex:1;">
+                  <div style="margin-bottom:4px;">${catBadge}</div>
+                  <div style="font-size:15px; font-weight:700; color:#222; ${sp.visited ? 'text-decoration:line-through;' : ''}">${sp.place}</div>
+                  ${localSub}
+                </div>
+              </div>
+              ${noteSub}
+              <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-top:10px; padding-top:10px; border-top:1px solid #F2ECE4; flex-wrap:wrap;">
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                  <button type="button" data-place="${escapeAttr(sp.place)}" data-local="${escapeAttr(sp.localName)}" data-url="${escapeAttr(sp.mapUrl)}" onclick="openMultiMapFromBtn(this)" style="background:#ECFDF5; color:#2D5E46; border:1px solid #CBE4D6; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:700; cursor:pointer;">📍 นำทาง</button>
+                  <button type="button" data-id="${escapeAttr(sp.id)}" onclick="moveSpotToPlan(this.getAttribute('data-id'))" style="background:#FAF9F5; color:#333; border:1px solid #EAE6DF; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:600; cursor:pointer;">🗓️ ลงตารางเที่ยว</button>
+                  <button type="button" data-date="${getLocalTodayStr()}" data-place="${escapeAttr(sp.place)}" onclick="logExpenseFromItinBtn(this)" style="background:#FAF9F5; color:#333; border:1px solid #EAE6DF; border-radius:8px; padding:6px 10px; font-size:12px; font-weight:600; cursor:pointer;">💸 จ่ายเงิน</button>
+                </div>
+                <div style="display:flex; gap:4px;">
+                  <button type="button" data-id="${escapeAttr(sp.id)}" onclick="openEditItinModal(this.getAttribute('data-id'))" class="clean-action-btn">✏️</button>
+                  <button type="button" data-id="${escapeAttr(sp.id)}" onclick="removeItinItem(this.getAttribute('data-id'))" class="clean-action-btn del">🗑️</button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+        container.innerHTML = html;
+      }
+
+      function moveSpotToPlan(planId) {
+        openEditItinModal(planId);
+        var planRadio = document.getElementById('itinCatPlan');
+        if (planRadio) {
+          planRadio.checked = true;
+          onItinCategoryChange();
+        }
+        var dateInput = document.getElementById('itinDateInput');
+        if (dateInput && !dateInput.value) {
+          dateInput.value = selectedItinDate || getLocalTodayStr();
+        }
+        document.getElementById('itinModalTitle').innerText = "🗓️ ย้ายลงแผนเที่ยวรายวัน";
+      }
+
+      function copyQuickTextBtn(btn) {
+        var text = btn.getAttribute('data-text') || "";
+        if (!text) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function() {
+            alert("📋 คัดลอก '" + text + "' เรียบร้อย!");
+          });
+        } else {
+          var ta = document.createElement("textarea");
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          alert("📋 คัดลอก '" + text + "' เรียบร้อย!");
+        }
+      }
+
       function selectItinDay(dateStr) {
         selectedItinDate = dateStr;
         renderItineraryView();
       }
 
-      function openAddItinModal() {
+      function onItinCategoryChange() {
+        var checkedEl = document.querySelector('input[name="itinCategoryChoice"]:checked');
+        var cat = checkedEl ? checkedEl.value : 'plan';
+        var dtRow = document.getElementById('itinDateTimeRow');
+        var hotelRow = document.getElementById('itinHotelDatesRow');
+        var placeLbl = document.getElementById('itinPlaceLabel');
+        var placeInp = document.getElementById('itinPlaceInput');
+        var localLbl = document.getElementById('itinLocalLabel');
+        var localInp = document.getElementById('itinLocalNameInput');
+        var noteInp = document.getElementById('itinNoteInput');
+
+        if (cat === 'plan') {
+          dtRow.style.display = 'grid';
+          hotelRow.style.display = 'none';
+          placeLbl.innerText = "ชื่อสถานที่ / กิจกรรม";
+          placeInp.placeholder = "เช่น พระราชวังเคียงบกกุง";
+          localLbl.innerText = "ชื่อภาษาท้องถิ่น / คำค้นหาแผนที่ (ไม่บังคับ)";
+          localInp.placeholder = "เช่น 경복궁 หรือ สถานีรถไฟ";
+          noteInp.placeholder = "เช่น ทางออก 5, รอบเข้าชม 10:00 น.";
+        } else if (cat === 'hotel') {
+          dtRow.style.display = 'none';
+          hotelRow.style.display = 'grid';
+          placeLbl.innerText = "ชื่อโรงแรม / ที่พัก";
+          placeInp.placeholder = "เช่น Seoul Cozy Hostel / Toyoko Inn";
+          localLbl.innerText = "ชื่อโรงแรมหรือที่อยู่ภาษาท้องถิ่น (ไว้ให้แท็กซี่/ค้นหาแผนที่)";
+          localInp.placeholder = "เช่น 서울특별시 종로구... หรือ ชื่อภาษาเกาหลี/ญี่ปุ่น/จีน";
+          noteInp.placeholder = "เช่น รหัสจอง (Booking ID), รหัสเข้าห้อง, เวลา Check-in 15:00 น.";
+        } else if (cat === 'food') {
+          dtRow.style.display = 'none';
+          hotelRow.style.display = 'none';
+          placeLbl.innerText = "ชื่อร้านอาหาร / คาเฟ่";
+          placeInp.placeholder = "เช่น Tosokchon Samgyetang / คาเฟ่ยอนนัมดง";
+          localLbl.innerText = "ชื่อร้านภาษาท้องถิ่น / ย่าน (สำหรับค้นหาใน Naver/Amap)";
+          localInp.placeholder = "เช่น 토속촌 삼계탕 (ย่าน Gyeongbokgung)";
+          noteInp.placeholder = "เช่น เมนูแนะนำ, เวลาเปิด-ปิด, วิธีจองคิว";
+        } else {
+          dtRow.style.display = 'none';
+          hotelRow.style.display = 'none';
+          placeLbl.innerText = "ชื่อร้านของฝาก / แหล่งช้อปปิ้ง";
+          placeInp.placeholder = "เช่น Olive Young สาขาเมียงดง / Lotte Mart";
+          localLbl.innerText = "ชื่อร้านภาษาท้องถิ่น / ย่าน";
+          localInp.placeholder = "เช่น 올리브영 명동타운";
+          noteInp.placeholder = "เช่น รายการของฝากที่ต้องซื้อ, ทำ Tax Refund ได้";
+        }
+      }
+
+      function openAddItinModal(defaultCat) {
         var trip = getCurrentTrip();
         if (!trip) return;
-        document.getElementById('itinModalTitle').innerText = "🗺️ เพิ่มแผนเที่ยว";
+        var cat = defaultCat || (activeItinSubTab === 'Hotel' ? 'hotel' : (activeItinSubTab === 'Spots' ? 'food' : 'plan'));
+        document.getElementById('itinModalTitle').innerText = cat === 'hotel' ? "🏨 เพิ่มข้อมูลที่พัก" : (cat === 'food' || cat === 'shop' ? "📌 เพิ่มร้านในลิสต์" : "🗺️ เพิ่มแผนเที่ยวรายวัน");
         document.getElementById('itinPlanId').value = "";
+
+        var radioMap = { plan: 'itinCatPlan', hotel: 'itinCatHotel', food: 'itinCatFood', shop: 'itinCatShop' };
+        var rEl = document.getElementById(radioMap[cat] || 'itinCatPlan');
+        if (rEl) rEl.checked = true;
+        onItinCategoryChange();
+
         document.getElementById('itinDateInput').value = selectedItinDate || getLocalTodayStr();
         document.getElementById('itinTimeInput').value = "09:30";
+        document.getElementById('itinCheckInInput').value = "";
+        document.getElementById('itinCheckOutInput').value = "";
         document.getElementById('itinPlaceInput').value = "";
         document.getElementById('itinLocalNameInput').value = "";
         document.getElementById('itinMapUrlInput').value = "";
-        document.getElementById('itinEstCostInput').value = "";
         document.getElementById('itinNoteInput').value = "";
-        document.getElementById('itinEstCurrLabel').innerText = trip.defaultCurrency || "THB";
         showModalAtViewport('itinFormModal');
       }
 
       function openEditItinModal(planId) {
         var trip = getCurrentTrip();
         if (!trip) return;
-        var items = (appData.tripItineraries && appData.tripItineraries[trip.name]) ? appData.tripItineraries[trip.name] : [];
+        var items = getCleanItinItems(trip.name);
         var item = items.find(function(x) { return x.id.toString() === planId.toString(); });
         if (!item) return;
 
-        document.getElementById('itinModalTitle').innerText = "✏️ แก้ไขแผนเที่ยว";
+        document.getElementById('itinModalTitle').innerText = "✏️ แก้ไขข้อมูล";
         document.getElementById('itinPlanId').value = item.id;
-        document.getElementById('itinDateInput').value = formatItinDate(item.date);
-        document.getElementById('itinTimeInput').value = formatItinTime(item.time) || "09:30";
+
+        var radioMap = { plan: 'itinCatPlan', hotel: 'itinCatHotel', food: 'itinCatFood', shop: 'itinCatShop' };
+        var rEl = document.getElementById(radioMap[item.category] || 'itinCatPlan');
+        if (rEl) rEl.checked = true;
+        onItinCategoryChange();
+
+        if (item.category === 'hotel') {
+          document.getElementById('itinCheckInInput').value = formatItinDate(item.date);
+          document.getElementById('itinCheckOutInput').value = formatItinDate(item.time);
+        } else {
+          document.getElementById('itinDateInput').value = formatItinDate(item.date);
+          document.getElementById('itinTimeInput').value = formatItinTime(item.time) || "09:30";
+        }
         document.getElementById('itinPlaceInput').value = item.place || "";
         document.getElementById('itinLocalNameInput').value = item.localName || "";
         document.getElementById('itinMapUrlInput').value = item.mapUrl || "";
-        document.getElementById('itinEstCostInput').value = item.estCost > 0 ? item.estCost : "";
         document.getElementById('itinNoteInput').value = item.note || "";
-        document.getElementById('itinEstCurrLabel').innerText = trip.defaultCurrency || "THB";
         showModalAtViewport('itinFormModal');
       }
 
@@ -1574,20 +1869,31 @@
         var trip = getCurrentTrip();
         if (!trip) return;
 
+        var checkedCatEl = document.querySelector('input[name="itinCategoryChoice"]:checked');
+        var catVal = checkedCatEl ? checkedCatEl.value : 'plan';
+
         var planId = document.getElementById('itinPlanId').value;
-        var dateVal = document.getElementById('itinDateInput').value;
-        var timeVal = document.getElementById('itinTimeInput').value;
+        var dateVal = "";
+        var timeVal = "";
+
+        if (catVal === 'plan') {
+          dateVal = document.getElementById('itinDateInput').value || getLocalTodayStr();
+          timeVal = document.getElementById('itinTimeInput').value || "";
+          selectedItinDate = dateVal;
+        } else if (catVal === 'hotel') {
+          dateVal = document.getElementById('itinCheckInInput').value || "";
+          timeVal = document.getElementById('itinCheckOutInput').value || "";
+        }
+
         var placeVal = document.getElementById('itinPlaceInput').value.trim();
         var localVal = document.getElementById('itinLocalNameInput').value.trim();
         var urlVal = document.getElementById('itinMapUrlInput').value.trim();
-        var costVal = parseFloat(document.getElementById('itinEstCostInput').value) || 0;
         var noteVal = document.getElementById('itinNoteInput').value.trim();
 
         var btn = document.getElementById('btnSaveItin');
         if (btn.disabled) return;
         btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
 
-        selectedItinDate = dateVal;
         if (!appData.tripItineraries) appData.tripItineraries = {};
         if (!appData.tripItineraries[trip.name]) appData.tripItineraries[trip.name] = [];
 
@@ -1599,38 +1905,42 @@
             target.place = placeVal;
             target.localName = localVal;
             target.mapUrl = urlVal;
-            target.estCost = costVal;
             target.note = noteVal;
+            target.category = catVal;
           }
           saveLightTextCache(appData);
           closeItinFormModal();
-          renderItineraryView();
+          if (catVal === 'hotel') switchItinSubTab('Hotel');
+          else if (catVal === 'food' || catVal === 'shop') switchItinSubTab('Spots');
+          else switchItinSubTab('Plan');
           renderHomeDashboard();
-          btn.innerText = "💾 บันทึกแผนเที่ยว"; btn.disabled = false;
+          btn.innerText = "💾 บันทึกข้อมูล"; btn.disabled = false;
 
           google.script.run.withSuccessHandler(function() {
             loadAppData(true, function() { renderItineraryView(); });
           }).editItineraryItem({
             tripName: trip.name, planId: planId, date: dateVal, time: timeVal,
-            place: placeVal, localName: localVal, mapUrl: urlVal, note: noteVal, estCost: costVal
+            place: placeVal, localName: localVal, mapUrl: urlVal, note: noteVal, category: catVal
           });
         } else {
           var newId = 'plan_' + new Date().getTime();
           appData.tripItineraries[trip.name].push({
             id: newId, date: dateVal, time: timeVal, place: placeVal,
-            localName: localVal, mapUrl: urlVal, note: noteVal, estCost: costVal, visited: false
+            localName: localVal, mapUrl: urlVal, note: noteVal, category: catVal, visited: false
           });
           saveLightTextCache(appData);
           closeItinFormModal();
-          renderItineraryView();
+          if (catVal === 'hotel') switchItinSubTab('Hotel');
+          else if (catVal === 'food' || catVal === 'shop') switchItinSubTab('Spots');
+          else switchItinSubTab('Plan');
           renderHomeDashboard();
-          btn.innerText = "💾 บันทึกแผนเที่ยว"; btn.disabled = false;
+          btn.innerText = "💾 บันทึกข้อมูล"; btn.disabled = false;
 
           google.script.run.withSuccessHandler(function() {
             loadAppData(true, function() { renderItineraryView(); });
           }).saveItineraryItem({
             tripName: trip.name, planId: newId, date: dateVal, time: timeVal,
-            place: placeVal, localName: localVal, mapUrl: urlVal, note: noteVal, estCost: costVal
+            place: placeVal, localName: localVal, mapUrl: urlVal, note: noteVal, category: catVal
           });
         }
       }
@@ -1651,7 +1961,7 @@
       function removeItinItem(planId) {
         var trip = getCurrentTrip();
         if (!trip) return;
-        if (!confirm("ต้องการลบจุดหมายนี้ออกจากแผนเที่ยวใช่หรือไม่?")) return;
+        if (!confirm("ต้องการลบรายการนี้ออกจากระบบใช่หรือไม่?")) return;
         if (appData.tripItineraries && appData.tripItineraries[trip.name]) {
           appData.tripItineraries[trip.name] = appData.tripItineraries[trip.name].filter(function(x) { return x.id.toString() !== planId.toString(); });
         }
@@ -1665,11 +1975,9 @@
       function logExpenseFromItinBtn(btn) {
         var dt = btn.getAttribute('data-date') || getLocalTodayStr();
         var place = btn.getAttribute('data-place') || "";
-        var cost = parseFloat(btn.getAttribute('data-cost')) || 0;
         switchTab('Expense');
         document.getElementById('date').value = dt;
         document.getElementById('description').value = place;
-        if (cost > 0) document.getElementById('amount').value = cost;
         updateRateUI();
       }
 
@@ -1728,7 +2036,7 @@
           document.body.removeChild(ta);
           alert("📋 คัดลอก '" + text + "' แล้ว!");
         }
-      }
+      }      }
     </script>
 
     <script>
@@ -1986,23 +2294,51 @@
           }
         }
 
-        // 1.5 Today's Itinerary
-        var allItins = getCleanItinItems(trip.name);
+        // 1.5 Today's Itinerary + Hotel + Saved Spots
+        var allSaved = getCleanItinItems(trip.name);
+        var planItins = allSaved.filter(function(x) { return x.category === 'plan'; });
+        var hotelsList = allSaved.filter(function(x) { return x.category === 'hotel'; });
+        var spotsList = allSaved.filter(function(x) { return x.category === 'food' || x.category === 'shop'; });
+
+        var hHotelCnt = document.getElementById('homeHotelCount');
+        var hSpotsCnt = document.getElementById('homeSpotsCount');
+        if (hHotelCnt) hHotelCnt.innerText = hotelsList.length;
+        if (hSpotsCnt) hSpotsCnt.innerText = spotsList.length;
+
+        var hotelStripEl = document.getElementById('homeHotelQuickStrip');
+        if (hotelStripEl) {
+          if (hotelsList.length > 0) {
+            var mainHotel = hotelsList[0];
+            hotelStripEl.style.display = "block";
+            hotelStripEl.innerHTML = `
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#F4FBF7; border:1px solid #CBE4D6; border-radius:10px; gap:8px;">
+                <div style="min-width:0; flex:1;">
+                  <div style="font-size:12px; font-weight:700; color:#2D5E46; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🏨 ${mainHotel.place}</div>
+                  ${mainHotel.localName ? '<div style="font-size:10px; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">' + mainHotel.localName + '</div>' : ''}
+                </div>
+                <button type="button" data-place="${escapeAttr(mainHotel.place)}" data-local="${escapeAttr(mainHotel.localName)}" data-url="${escapeAttr(mainHotel.mapUrl)}" onclick="openMultiMapFromBtn(this)" style="background:#3E7B5D; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:11px; font-weight:bold; cursor:pointer; white-space:nowrap; flex-shrink:0;">🧭 กลับที่พัก</button>
+              </div>
+            `;
+          } else {
+            hotelStripEl.style.display = "none";
+          }
+        }
+
         var homeItinEl = document.getElementById('homeTodayItinList');
         var homeItinTitleEl = document.getElementById('homeTodayItinTitle');
         if (homeItinEl) {
-          if (allItins.length === 0) {
+          if (planItins.length === 0) {
             if (homeItinTitleEl) homeItinTitleEl.innerText = "🗺️ แผนเที่ยว";
-            homeItinEl.innerHTML = "<div style='text-align:center; padding:8px 0;'><span style='font-size:12px; color:#888;'>ยังไม่มีแผนเที่ยว </span><button type='button' onclick=\"switchTab('Itinerary'); openAddItinModal();\" style='background:#ECFDF5; color:#3E7B5D; border:none; border-radius:8px; padding:4px 10px; font-size:11px; font-weight:bold; cursor:pointer;'>+ เพิ่มเลย</button></div>";
+            homeItinEl.innerHTML = "<div style='text-align:center; padding:8px 0;'><span style='font-size:12px; color:#888;'>ยังไม่มีแผนเที่ยวรายวัน </span><button type='button' onclick=\"switchTab('Itinerary'); openAddItinModal('plan');\" style='background:#ECFDF5; color:#3E7B5D; border:none; border-radius:8px; padding:4px 10px; font-size:11px; font-weight:bold; cursor:pointer;'>+ เพิ่มเลย</button></div>";
           } else {
             var todayStr = getLocalTodayStr();
-            var uniqueDates = Array.from(new Set(allItins.map(function(x) { return x.date; }))).sort();
+            var uniqueDates = Array.from(new Set(planItins.map(function(x) { return x.date; }).filter(Boolean))).sort();
             var targetDate = uniqueDates.indexOf(todayStr) !== -1 ? todayStr : uniqueDates[0];
             var dayNum = uniqueDates.indexOf(targetDate) + 1;
             if (homeItinTitleEl) {
               homeItinTitleEl.innerText = (targetDate === todayStr) ? ("🗺️ แผนเที่ยววันนี้ (Day " + dayNum + ")") : ("🗺️ แผนเที่ยว Day " + dayNum + " (" + formatThaiShortDate(targetDate) + ")");
             }
-            var dayItems = allItins.filter(function(x) { return x.date === targetDate; }).sort(function(a, b) { return (a.time || "").localeCompare(b.time || ""); });
+            var dayItems = planItins.filter(function(x) { return x.date === targetDate; }).sort(function(a, b) { return (a.time || "").localeCompare(b.time || ""); });
             var hItinHtml = "";
             dayItems.slice(0, 3).forEach(function(item) {
               hItinHtml += `
