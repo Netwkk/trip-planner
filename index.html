@@ -245,12 +245,13 @@
       .settle-row { gap: 8px; }
       .settle-row > div:first-child { word-break: break-word; }
 
-      /* Bottom Navigation Bar (Warm Cream & Mint Green App Theme) */
+      /* Bottom Navigation Bar (Pinned flush to bottom edge) */
       .bottom-nav {
         position: fixed;
         bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        right: 0;
+        margin: 0 auto;
         width: 100%;
         max-width: 440px;
         background: #ffffff;
@@ -258,9 +259,9 @@
         display: none;
         grid-template-columns: repeat(5, 1fr);
         align-items: center;
-        padding: 8px 4px calc(10px + env(safe-area-inset-bottom, 0px)) 4px;
+        padding: 8px 4px calc(6px + env(safe-area-inset-bottom, 0px)) 4px;
         box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
-        border-radius: 22px 22px 0 0;
+        border-radius: 20px 20px 0 0;
         z-index: 9000;
       }
       .bnav-item {
