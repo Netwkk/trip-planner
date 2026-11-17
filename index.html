@@ -12,7 +12,11 @@
     <link rel="shortcut icon" type="image/png" href="travel.png">
     <link rel="apple-touch-icon" href="travel.png">
     <meta name="theme-color" content="#3E7B5D">
-    <!-- System Thai & Mobile Fonts for fast offline/international loading -->
+    <!-- Google Fonts: Prompt (Non-blocking load) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
     <style>
       * {
         box-sizing: border-box;
@@ -2649,130 +2653,160 @@
         var container = document.getElementById('personSummaryContainer');
         container.innerHTML = "<p style='text-align:center; color:#777; padding:20px;'>กำลังคำนวณยอด...</p>";
 
-        google.script.run.withSuccessHandler(function(res) {
-          cachedPersonData = res.summary;
-          cachedOverallSummary = res.overallSummary;
-          var html = "";
+        google.script.run
+          .withFailureHandler(function(err) {
+            container.innerHTML = "<p style='text-align:center; color:#c0392b; padding:20px;'>❌ คำนวณยอดไม่สำเร็จ: " + err.message + "</p>";
+          })
+          .withSuccessHandler(function(res) {
+            if (!res || !res.members) {
+              container.innerHTML = "<p style='text-align:center; color:#777; padding:20px;'>ไม่พบข้อมูลสรุป</p>";
+              return;
+            }
 
-          // 1. 👤 ยอดแต่ละคน (ตามสถานะทริป) ขึ้นก่อนเป็นอันดับแรก
-          html += `<div style="font-size: 15px; font-weight: bold; color: #555; margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">👤</span> ยอดแต่ละคน (แตะเพื่อดูรายละเอียด)</span>
-                   </div>`;
-
-          res.members.forEach(function(m) {
-            var data = res.summary[m] || { paid: 0, share: 0 };
-            var diff = data.paid - data.share;
-            var isPositive = diff >= 0;
-            var diffText = isPositive ? `ได้คืน ฿${diff.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : `ต้องจ่าย ฿${Math.abs(diff).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            var badgeClass = isPositive ? 'positive' : 'negative';
-            var initial = m.charAt(0).toUpperCase();
-
-            html += `
-              <div class="member-card" onclick="openPersonModal('${m}')">
-                <div class="mc-header">
-                  <div class="mc-avatar-name">
-                    <div class="mc-avatar">${initial}</div>
-                    <span>${m}</span>
-                  </div>
-                  <div class="mc-badge ${badgeClass}">${diffText}</div>
-                </div>
-                <div class="mc-stats">
-                  <div class="mc-stat-box">
-                    <div class="mc-stat-label">จ่ายไปแล้ว</div>
-                    <div class="mc-stat-val" style="color:#059669;">฿${data.paid.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                  </div>
-                  <div class="mc-stat-box">
-                    <div class="mc-stat-label">ส่วนที่ต้องรับผิดชอบ</div>
-                    <div class="mc-stat-val" style="color:#d35400;">฿${data.share.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
-                  </div>
-                </div>
-              </div>
-            `;
-          });
-
-          // 2. การ์ด 📊 แยกตามหมวดหมู่ค่าใช้จ่าย (แสดงภาพรวมทันทีแบบ Real-time ไม่ต้องรอปิดทริป)
-          if (res.categories && res.categories.length > 0) {
-            var grandTotalFmt = (res.grandTotal || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            html += `
-              <div style="background: white; border-radius: 16px; margin-top: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #eee; overflow:hidden;">
-                <div onclick="toggleAccordion(this)" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #fafafa;">
-                  <div style="font-size: 15px; font-weight: bold; color: #333; display:flex; align-items:center; gap:8px;">
-                    <span>📊</span> แยกตามหมวดหมู่ค่าใช้จ่าย
-                  </div>
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:12px; color:#3E7B5D; font-weight:bold;">รวม ฿${grandTotalFmt}</span>
-                    <span class="accordion-arrow" style="font-size: 14px; transition: transform 0.2s; transform: rotate(180deg);">▼</span>
-                  </div>
-                </div>
-                <div class="accordion-content" style="display: block; padding: 18px 20px 8px 20px; border-top: 1px solid #eee;">`;
-            res.categories.forEach(function(c) {
-               var pct = Math.round(c.percent);
-               var hasAmt = c.total > 0;
-               html += `
-                 <div class="cat-row" style="opacity: ${hasAmt ? '1' : '0.45'};">
-                   <span style="color: #333;">${c.name}</span>
-                   <span><b>฿${c.total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b> <span style="color:#aaa; font-weight:normal; font-size:12px;">${pct}%</span></span>
-                 </div>
-                 <div class="cat-bar-bg" style="opacity: ${hasAmt ? '1' : '0.45'};"><div class="cat-bar-fill" style="width: ${pct}%;"></div></div>
-               `;
+            var summaryMap = {};
+            var memberNames = [];
+            res.members.forEach(function(mObj) {
+              var mName = mObj.name;
+              memberNames.push(mName);
+              var paidTotal = (Number(mObj.fundContributed) || 0) + (Number(mObj.personalPaidCleared) || 0);
+              var shareTotal = (Number(mObj.expenseShare) || 0) + (Number(mObj.fundShare) || 0);
+              summaryMap[mName] = {
+                paid: paidTotal,
+                share: shareTotal,
+                netBalance: Number(mObj.netBalance) || 0,
+                items: mObj.items || [],
+                raw: mObj
+              };
             });
-            html += `</div>
+            cachedPersonData = summaryMap;
+
+            var html = "";
+            html += `<div style="font-size: 15px; font-weight: bold; color: #555; margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center;">
+                      <span style="display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">👤</span> ยอดแต่ละคน (แตะเพื่อดูรายละเอียด)</span>
+                     </div>`;
+
+            memberNames.forEach(function(m) {
+              var data = summaryMap[m];
+              var diff = data.netBalance;
+              var isPositive = diff >= 0;
+              var diffText = isPositive
+                ? `ได้คืน ฿${diff.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`
+                : `ต้องจ่าย ฿${Math.abs(diff).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+              var badgeClass = isPositive ? 'positive' : 'negative';
+              var initial = m.charAt(0).toUpperCase();
+
+              html += `
+                <div class="member-card" onclick="openPersonModal('${escapeAttr(m)}')">
+                  <div class="mc-header">
+                    <div class="mc-avatar-name">
+                      <div class="mc-avatar">${initial}</div>
+                      <span>${m}</span>
+                    </div>
+                    <div class="mc-badge ${badgeClass}">${diffText}</div>
+                  </div>
+                  <div class="mc-stats">
+                    <div class="mc-stat-box">
+                      <div class="mc-stat-label">จ่ายไปแล้ว (รวมเติมกองกลาง)</div>
+                      <div class="mc-stat-val" style="color:#059669;">฿${data.paid.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    </div>
+                    <div class="mc-stat-box">
+                      <div class="mc-stat-label">ส่วนที่รับผิดชอบ (หักกองกลางคืน)</div>
+                      <div class="mc-stat-val" style="color:#d35400;">฿${data.share.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            });
+
+            var catObj = res.categoryTotals || {};
+            var grandTotal = Number(res.grandTotalExpense) || 0;
+            var catKeys = Object.keys(catObj);
+            if (catKeys.length > 0) {
+              var grandTotalFmt = grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+              html += `
+                <div style="background: white; border-radius: 16px; margin-top: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #eee; overflow:hidden;">
+                  <div onclick="toggleAccordion(this)" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #fafafa;">
+                    <div style="font-size: 15px; font-weight: bold; color: #333; display:flex; align-items:center; gap:8px;">
+                      <span>📊</span> แยกตามหมวดหมู่ค่าใช้จ่าย
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="font-size:12px; color:#3E7B5D; font-weight:bold;">รวม ฿${grandTotalFmt}</span>
+                      <span class="accordion-arrow" style="font-size: 14px; transition: transform 0.2s; transform: rotate(180deg);">▼</span>
+                    </div>
+                  </div>
+                  <div class="accordion-content" style="display: block; padding: 18px 20px 8px 20px; border-top: 1px solid #eee;">`;
+
+              catKeys.sort(function(a, b) { return (catObj[b] || 0) - (catObj[a] || 0); }).forEach(function(catName) {
+                var cTotal = Number(catObj[catName]) || 0;
+                var pct = grandTotal > 0 ? Math.round((cTotal / grandTotal) * 100) : 0;
+                var hasAmt = cTotal > 0;
+                html += `
+                  <div class="cat-row" style="opacity: ${hasAmt ? '1' : '0.45'};">
+                    <span style="color: #333;">${catName}</span>
+                    <span><b>฿${cTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b> <span style="color:#aaa; font-weight:normal; font-size:12px;">${pct}%</span></span>
+                  </div>
+                  <div class="cat-bar-bg" style="opacity: ${hasAmt ? '1' : '0.45'};"><div class="cat-bar-fill" style="width: ${pct}%;"></div></div>
+                `;
+              });
+              html += `</div></div>`;
+            }
+
+            var transfers = res.transfers || [];
+            var copyLines = ["✈️ สรุปยอดโอนเงินเคลียร์ทริป: " + trip.name];
+
+            html += `
+              <div style="background: white; border-radius: 16px; margin-top: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #ECFDF5; overflow:hidden;">
+                <div onclick="toggleAccordion(this)" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #EEF2FF;">
+                  <div style="font-size: 15px; font-weight: bold; color: #059669; display:flex; align-items:center; gap:8px;">
+                    <span>💸</span> สรุปการโอนเงินเคลียร์ยอด & ภาพรวม
+                  </div>
+                  <span class="accordion-arrow" style="font-size: 14px; transition: transform 0.2s; transform: rotate(0deg);">▼</span>
+                </div>
+                <div class="accordion-content" style="display: none; padding: 20px; border-top: 1px solid #ECFDF5;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                    <div style="font-size: 14px; font-weight: bold; color: #059669;">รายการโอนเงิน</div>
+                    <button type="button" onclick="copySettlementSummary()" style="background:#ECFDF5; color:#059669; border:1px solid #a9dfbf; border-radius:8px; padding:4px 10px; font-size:11px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">📋 คัดลอกส่งไลน์</button>
+                  </div>`;
+
+            if (transfers.length === 0) {
+              html += `<div style="text-align:center; color:#777; font-size:13px; padding:8px 0; margin-bottom:15px;">🎉 ยอดเงินลงตัวครบทุกคนแล้ว ไม่มียอดค้างโอน</div>`;
+              copyLines.push("🎉 ยอดเงินลงตัวครบทุกคนแล้ว!");
+            } else {
+              transfers.forEach(function(tr) {
+                var amtStr = Number(tr.amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                html += `<div class="settle-row">
+                          <div><b>${tr.from}</b> <span style="color:#888; margin:0 4px;">➔ โอนให้</span> <b>${tr.to}</b></div>
+                          <div style="font-weight:bold; color:#c0392b; font-size:15px;">฿${amtStr}</div>
+                         </div>`;
+                copyLines.push("• " + tr.from + " โอนให้ " + tr.to + " : " + amtStr + " บาท");
+              });
+              html += `<div style="margin-bottom:15px;"></div>`;
+            }
+
+            var fundBal = Number(res.remainingFund !== undefined ? res.remainingFund : (appData.fundBalances[trip.name] || 0));
+            if (Math.abs(fundBal) > 0.01) {
+              copyLines.push("👛 เงินกองกลางคงเหลือ: " + fundBal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " บาท");
+            }
+            lastSettlementCopyText = copyLines.join("\n");
+
+            html += `<div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 10px; margin-top:15px;">📌 สรุปภาพรวมทั้งทริป (จ่ายจริงทุกรายการ)</div>
+                     <div style="overflow-x: auto;">
+                       <table class="summary-table" style="margin-bottom:0;">
+                         <tr><th>สมาชิก</th><th>จ่ายจริง</th><th>ส่วนที่ต้องหาร</th></tr>`;
+            memberNames.forEach(function(m) {
+              var ov = summaryMap[m].raw;
+              var ovPaid = (Number(ov.fundContributed) || 0) + (Number(ov.personalPaid) || 0);
+              var ovShare = (Number(ov.expenseShare) || 0) + (Number(ov.fundShare) || 0);
+              html += `<tr><td><b>${m}</b></td><td style="color:#059669; font-weight:bold;">฿${ovPaid.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td><td style="color:#d35400;">฿${ovShare.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+            });
+            html += `   </table>
+                     </div>
+                    </div>
               </div>`;
-          }
 
-          // 3. Accordion สำหรับ 💸 สรุปการโอนเงินเคลียร์ยอด & ภาพรวม
-          var transfers = calculateSettlementTransfers(res.members, res.summary);
-          var copyLines = ["✈️ สรุปยอดโอนเงินเคลียร์ทริป: " + trip.name];
-          
-          html += `
-            <div style="background: white; border-radius: 16px; margin-top: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #ECFDF5; overflow:hidden;">
-              <div onclick="toggleAccordion(this)" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #EEF2FF;">
-                <div style="font-size: 15px; font-weight: bold; color: #059669; display:flex; align-items:center; gap:8px;">
-                  <span>💸</span> สรุปการโอนเงินเคลียร์ยอด & ภาพรวม
-                </div>
-                <span class="accordion-arrow" style="font-size: 14px; transition: transform 0.2s; transform: rotate(0deg);">▼</span>
-              </div>
-              <div class="accordion-content" style="display: none; padding: 20px; border-top: 1px solid #ECFDF5;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
-                  <div style="font-size: 14px; font-weight: bold; color: #059669;">รายการโอนเงิน</div>
-                  <button type="button" onclick="copySettlementSummary()" style="background:#ECFDF5; color:#059669; border:1px solid #a9dfbf; border-radius:8px; padding:4px 10px; font-size:11px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">📋 คัดลอกส่งไลน์</button>
-                </div>`;
-          
-          if (transfers.length === 0) {
-            html += `<div style="text-align:center; color:#777; font-size:13px; padding:8px 0; margin-bottom:15px;">🎉 ยอดเงินลงตัวครบทุกคนแล้ว ไม่มียอดค้างโอน</div>`;
-            copyLines.push("🎉 ยอดเงินลงตัวครบทุกคนแล้ว!");
-          } else {
-            transfers.forEach(function(tr) {
-              var amtStr = tr.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-              html += `<div class="settle-row">
-                        <div><b>${tr.from}</b> <span style="color:#888; margin:0 4px;">➔ โอนให้</span> <b>${tr.to}</b></div>
-                        <div style="font-weight:bold; color:#c0392b; font-size:15px;">฿${amtStr}</div>
-                       </div>`;
-              copyLines.push("• " + tr.from + " โอนให้ " + tr.to + " : " + amtStr + " บาท");
-            });
-            html += `<div style="margin-bottom:15px;"></div>`;
-          }
-          var fundBal = appData.fundBalances[trip.name] || 0;
-          if (Math.abs(fundBal) > 0.01) {
-            copyLines.push("👛 เงินกองกลางคงเหลือ: " + fundBal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " บาท");
-          }
-          lastSettlementCopyText = copyLines.join("\n");
-
-          html += `<div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 10px; margin-top:15px;">📌 สรุปภาพรวมทั้งทริป (จ่ายจริงทุกรายการ)</div>
-                   <div style="overflow-x: auto;">
-                     <table class="summary-table" style="margin-bottom:0;">
-                       <tr><th>สมาชิก</th><th>จ่ายจริง</th><th>ส่วนที่ต้องหาร</th></tr>`;
-          res.members.forEach(function(m) {
-            var ov = res.overallSummary[m] || { totalPaid: 0, totalShare: 0 };
-            html += `<tr><td><b>${m}</b></td><td style="color:#059669; font-weight:bold;">฿${ov.totalPaid.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td><td style="color:#d35400;">฿${ov.totalShare.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
-          });
-          html += `   </table>
-                   </div>
-                  </div>
-            </div>`;
-
-          container.innerHTML = html;
-        }).getPerPersonSummary(trip.name);
+            container.innerHTML = html;
+          })
+          .getPerPersonSummary(trip.name);
       }
 
 
@@ -2797,32 +2831,30 @@ function openPersonModal(memberName) {
         } else {
           var listHtml = "";
           items.forEach(function(it) {
-            var isFundTopup = (it.entryType === "เติมกองกลาง");
-            var displayMainAmt = isFundTopup ? it.totalBillAmount : it.shareAmount;
-            var mainAmtLabel = isFundTopup ? "เติมเงินเข้ากองกลาง" : (it.isSharer ? "ส่วนที่ต้องหาร" : "ไม่ได้ร่วมหารบิลนี้");
+            var isFundTopup = (it.type === "fund" || it.entryType === "เติมกองกลาง");
+            var isPayer = (it.type === "paid" || it.isPayer);
+            var displayMainAmt = Number(it.amount !== undefined ? it.amount : (isFundTopup ? it.totalBillAmount : it.shareAmount)) || 0;
+            var mainAmtLabel = it.role || (isFundTopup ? "เติมเงินเข้ากองกลาง" : (isPayer ? "สำรองจ่ายเอง" : "ส่วนที่ต้องหาร"));
+            var descText = it.desc || it.description || "";
+            var totalBillAmt = Number(it.totalBillAmount !== undefined ? it.totalBillAmount : displayMainAmt) || 0;
 
             var payerBadge = "";
             if (isFundTopup) {
               payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">เติมกองกลาง</span>`;
-            } else if (it.isPayer) {
+            } else if (isPayer) {
               payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">ออกเงินไปก่อน</span>`;
             }
 
             var receiptBtn = it.receiptUrl ? `<button type="button" class="receipt-badge-btn" onclick="openReceiptModal('${it.receiptUrl}')">🧾 ดูสลิป</button>` : "";
 
-            var billDetailText = "";
-            if (isFundTopup) {
-              billDetailText = `${it.date} • สกุลเงิน ${it.currency}`;
-            } else {
-              var foreignPart = (it.currency !== "THB" && it.foreignAmount) ? ` (${it.foreignAmount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} ${it.currency})` : "";
-              billDetailText = `${it.date} • ยอดรวมบิล <b>฿${it.totalBillAmount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</b>${foreignPart} • จ่ายโดย <b>${it.paidBy}</b>`;
-            }
+            var billDetailText = `${it.date || ''} • ${it.period || 'ระหว่างเที่ยว'}`;
+            if (it.paidBy) billDetailText += ` • จ่ายโดย <b>${it.paidBy}</b>`;
 
             var clearControlHtml = "";
-            if (it.period !== 'ระหว่างเที่ยว' && !isFundTopup) {
+            if (it.period && it.period !== 'ระหว่างเที่ยว' && !isFundTopup && it.rowIndex) {
               var isChecked = (it.clearStatus === 'จ่ายเงินแล้ว');
               clearControlHtml = `<label style="cursor:pointer; display:inline-flex; align-items:center; gap:5px; background:${isChecked?'#ECFDF5':'#fdedec'}; padding:4px 10px; border-radius:8px; border:1px solid ${isChecked?'#a9dfbf':'#fadbd8'};">
-                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleStatusGlobally(${it.rowIndex}, '${it.period}', '${it.date}', '${escapeAttr(it.description)}', ${it.totalBillAmount}, this.checked, 'Person', '${memberName}')" style="width:14px; height:14px; margin:0; accent-color:#3E7B5D;">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleStatusGlobally(${it.rowIndex}, '${it.period}', '${it.date}', '${escapeAttr(descText)}', ${totalBillAmt}, this.checked, 'Person', '${memberName}')" style="width:14px; height:14px; margin:0; accent-color:#3E7B5D;">
                 <span style="color:${isChecked?'#059669':'#c0392b'}; font-weight:bold; font-size:11px;">${isChecked?'✅ จ่ายแล้ว':'⏳ ค้างจ่าย'}</span>
               </label>`;
             }
@@ -2830,8 +2862,8 @@ function openPersonModal(memberName) {
             listHtml += `
               <div style="background: #fff; border: 1px solid #EAE6DF; border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
-                  <div style="font-size:14px; font-weight:600; color:#222; word-break:break-word; flex:1; line-height:1.4;">${it.description}</div>
-                  <div style="font-size:16px; font-weight:bold; color:${isFundTopup ? '#059669' : '#111'}; white-space:nowrap;">฿${displayMainAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+                  <div style="font-size:14px; font-weight:600; color:#222; word-break:break-word; flex:1; line-height:1.4;">${descText}</div>
+                  <div style="font-size:16px; font-weight:bold; color:${isFundTopup || isPayer ? '#059669' : '#111'}; white-space:nowrap;">฿${displayMainAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
                 </div>
                 
                 <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px;">
@@ -2867,16 +2899,39 @@ function openPersonModal(memberName) {
         if (!trip) return;
         var container = document.getElementById('prePostSummaryContainer');
         container.innerHTML = "<p style='text-align:center; color:#777;'>กำลังคำนวณยอด...</p>";
-        google.script.run.withSuccessHandler(function(res) {
-          var html = `<table class="summary-table"><tr><th>สมาชิก</th><th>จ่ายไปแล้ว</th><th>ส่วนที่ต้องหาร</th><th>คงเหลือ</th></tr>`;
-          res.members.forEach(function(m) {
-            var d = res.summary[m] || { paid:0, share:0 };
-            var diff = d.paid - d.share;
-            var dt = diff >= 0 ? `<span style="color:#27ae60;font-weight:bold;">+฿${diff.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</span>` : `<span style="color:#c0392b;font-weight:bold;">-฿${Math.abs(diff).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</span>`;
-            html += `<tr><td><b>${m}</b></td><td>฿${d.paid.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td>฿${d.share.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td>${dt}</td></tr>`;
-          });
-          container.innerHTML = html + `</table>`;
-        }).getPrePostSummary(trip.name);
+        google.script.run
+          .withFailureHandler(function(err) {
+            container.innerHTML = "<p style='text-align:center; color:#c0392b;'>❌ โหลดยอดไม่สำเร็จ: " + err.message + "</p>";
+          })
+          .withSuccessHandler(function(res) {
+            if (!res || !res.members) {
+              container.innerHTML = "<p style='text-align:center; color:#777;'>ไม่พบข้อมูล</p>";
+              return;
+            }
+            var html = `<table class="summary-table"><tr><th>สมาชิก</th><th>จ่ายไปแล้ว</th><th>ส่วนที่ต้องหาร</th><th>คงเหลือ</th></tr>`;
+            res.members.forEach(function(mObj) {
+              var paid = Number(mObj.paidUncleared) || 0;
+              var share = Number(mObj.shareUncleared) || 0;
+              var diff = Number(mObj.netBalance !== undefined ? mObj.netBalance : (paid - share));
+              var dt = diff >= 0
+                ? `<span style="color:#27ae60;font-weight:bold;">+฿${diff.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</span>`
+                : `<span style="color:#c0392b;font-weight:bold;">-฿${Math.abs(diff).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</span>`;
+              html += `<tr><td><b>${mObj.name}</b></td><td>฿${paid.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td>฿${share.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td>${dt}</td></tr>`;
+            });
+            html += `</table>`;
+
+            if (res.transfers && res.transfers.length > 0) {
+              html += `<div style="margin-top:10px; font-size:13px; font-weight:bold; color:#059669; margin-bottom:6px;">💸 ยอดโอนเคลียร์ค่าใช้จ่ายก่อน/หลังทริป</div>`;
+              res.transfers.forEach(function(tr) {
+                html += `<div class="settle-row">
+                          <div><b>${tr.from}</b> <span style="color:#888; margin:0 4px;">➔ โอนให้</span> <b>${tr.to}</b></div>
+                          <div style="font-weight:bold; color:#c0392b; font-size:14px;">฿${Number(tr.amount).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                         </div>`;
+              });
+            }
+            container.innerHTML = html;
+          })
+          .getPrePostSummary(trip.name);
       }
 
       function buildHistoryCardHtml(item, sourceView) {
