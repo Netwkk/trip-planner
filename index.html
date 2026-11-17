@@ -1024,9 +1024,69 @@
 
 
 
+    <!-- Modal ล็อกรหัสผ่านเข้าใช้งาน (PIN Lock) -->
+    <div id="pinLockModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100%; height:100%; background:rgba(250,249,245,0.98); z-index:200000; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:#ffffff; border:1px solid #EAE6DF; border-radius:24px; padding:28px 22px; width:100%; max-width:360px; box-shadow:0 10px 30px rgba(0,0,0,0.08); text-align:center;">
+        <div style="width:56px; height:56px; background:#ECFDF5; color:#3E7B5D; border-radius:18px; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 14px auto;">🔒</div>
+        <div style="font-size:19px; font-weight:700; color:#222; margin-bottom:6px;">Trip Planner ✈️</div>
+        <div style="font-size:13px; color:#777; margin-bottom:18px;">กรุณากรอกรหัสผ่านเพื่อเข้าใช้งานระบบทริป</div>
+        <form onsubmit="submitAppPin(event)">
+          <input type="password" id="appPinInput" inputmode="numeric" placeholder="กรอกรหัสผ่าน..." required style="text-align:center; font-size:20px; letter-spacing:4px; font-weight:bold; padding:14px; margin-bottom:12px; border-radius:14px; border:1.5px solid #ddd;">
+          <div id="pinErrorMsg" style="color:#c0392b; font-size:12px; font-weight:500; margin-bottom:12px; display:none;">❌ รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่</div>
+          <button type="submit" class="submit-btn" style="background:#3E7B5D; margin-top:0;">🔓 เข้าสู่ระบบ</button>
+        </form>
+      </div>
+    </div>
+
     <script>
       // 🔗 วางลิงก์ Web App URL (/exec) ของ Google Apps Script ตรงนี้:
       var GAS_API_URL = "https://script.google.com/macros/s/AKfycbym1aF6E_NsSEXQyjAI8ceqW3TdEF0c4-30w5EoR0d94ytEZuuxBZ9Bh_duvCsmMEpSWw/exec";
+
+      var PIN_STORAGE_KEY = "trip_planner_app_pin";
+
+      function getSavedPin() {
+        try { return localStorage.getItem(PIN_STORAGE_KEY) || ""; } catch (e) { return ""; }
+      }
+
+      function savePinToStorage(pin) {
+        try { localStorage.setItem(PIN_STORAGE_KEY, pin); } catch (e) {}
+      }
+
+      function clearSavedPin() {
+        try { localStorage.removeItem(PIN_STORAGE_KEY); } catch (e) {}
+      }
+
+      function showPinLockModal(showError) {
+        var modal = document.getElementById('pinLockModal');
+        var errEl = document.getElementById('pinErrorMsg');
+        var inputEl = document.getElementById('appPinInput');
+        if (modal) modal.style.display = 'flex';
+        if (errEl) errEl.style.display = showError ? 'block' : 'none';
+        if (inputEl) {
+          inputEl.value = '';
+          setTimeout(function() { inputEl.focus(); }, 100);
+        }
+      }
+
+      function hidePinLockModal() {
+        var modal = document.getElementById('pinLockModal');
+        if (modal) modal.style.display = 'none';
+      }
+
+      function submitAppPin(event) {
+        event.preventDefault();
+        var inputEl = document.getElementById('appPinInput');
+        var val = inputEl ? inputEl.value.trim() : "";
+        if (!val) return;
+        savePinToStorage(val);
+        hidePinLockModal();
+        var loader = document.getElementById('loader');
+        if (loader) {
+          loader.innerHTML = "กำลังตรวจสอบรหัสผ่านและโหลดข้อมูล...";
+          loader.style.display = 'block';
+        }
+        loadAppData(false);
+      }
 
       // ตัวจำลอง google.script.run ให้วิ่งผ่าน fetch() JSON API อัตโนมัติสำหรับรันบน GitHub Pages
       (function() {
@@ -1045,10 +1105,15 @@
                   if (failureHandler) failureHandler(new Error("กรุณาใส่ลิงก์ GAS_API_URL (/exec) ในไฟล์ index.html"));
                   return;
                 }
+                var currentPin = getSavedPin();
+                if (!currentPin) {
+                  showPinLockModal(false);
+                  return;
+                }
                 fetch(GAS_API_URL, {
                   method: "POST",
                   headers: { "Content-Type": "text/plain;charset=utf-8" },
-                  body: JSON.stringify({ action: prop, args: args })
+                  body: JSON.stringify({ pin: currentPin, action: prop, args: args })
                 })
                 .then(function(response) {
                   if (!response.ok) throw new Error("HTTP Error " + response.status);
@@ -1056,6 +1121,11 @@
                 })
                 .then(function(data) {
                   if (data && data.ok === false) {
+                    if (data.authError) {
+                      clearSavedPin();
+                      showPinLockModal(true);
+                      return;
+                    }
                     throw new Error(data.error || "Server error");
                   }
                   if (successHandler) successHandler(data ? data.result : null);
@@ -1092,7 +1162,12 @@
         document.getElementById('ppDate').value = today;
         document.getElementById('rateDate').value = today;
         document.getElementById('filterDate').value = today;
-        loadAppData(false);
+        if (!getSavedPin()) {
+          document.getElementById('loader').style.display = 'none';
+          showPinLockModal(false);
+        } else {
+          loadAppData(false);
+        }
       };
 
       function compressImageFile(fileInputId) {
