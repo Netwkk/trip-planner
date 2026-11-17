@@ -1,0 +1,2666 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Trip Planner">
+    <title>Trip Planner ✈️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      html, body {
+        width: 100%;
+        min-height: 100dvh;
+        margin: 0;
+        padding: 0;
+        font-family: 'Prompt', sans-serif;
+        background-color: #FAF9F5;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+      }
+      .container {
+        background-color: #FAF9F5;
+        padding: 20px 18px 95px 18px;
+        width: 100%;
+        max-width: 440px;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow-x: hidden;
+        word-break: break-word;
+      }
+      @media (min-width: 480px) {
+        body { background-color: #E2E8F0; padding: 12px 0; }
+        .container {
+          min-height: calc(100dvh - 24px);
+          border-radius: 24px;
+          box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+        }
+      }
+      h2 { text-align: center; color: #333; margin-top: 0; margin-bottom: 20px; font-weight: 700;}
+      label { font-size: 14px; font-weight: 500; margin-bottom: 5px; display: block; color: #555; }
+      input, select, textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #e0e0e0; border-radius: 10px; box-sizing: border-box; font-family: 'Prompt', sans-serif; font-size: 15px; background-color: #fff; transition: 0.2s;}
+      input:focus, select:focus, textarea:focus { border-color: #006874; outline: none; }
+      input[readonly], select[readonly] { background-color: #f5f5f5; color: #666; }
+      textarea { resize: vertical; min-height: 120px; }
+      .row-2 { display: flex; gap: 10px; } .row-2 > div { flex: 1; }
+      
+      .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+      .chip-item { position: relative; flex: 1; min-width: calc(25% - 6px); }
+      .chip-item.full-width { min-width: 100%; }
+      .chip-item input[type="radio"] { position: absolute; opacity: 0; cursor: pointer; height: 0; width: 0; }
+      .chip-label { display: block; background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 10px 4px; text-align: center; font-size: 12px; font-weight: 500; color: #555; cursor: pointer; transition: 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .chip-item input[type="radio"]:checked + .chip-label { background: #3E7B5D; border-color: #3E7B5D; color: #fff; font-weight: bold; box-shadow: 0 4px 10px rgba(69, 179, 157, 0.2); }
+
+      .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; background: #fff; padding: 12px; border-radius: 12px; border: 1px solid #eee; }
+      .checkbox-group label { display: flex; align-items: center; gap: 6px; font-weight: 400; margin-bottom: 0; width: calc(25% - 6px); min-width: 80px; flex: 1; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .checkbox-group input[type="checkbox"] { width: 16px; height: 16px; margin: 0; cursor: pointer; accent-color: #3E7B5D;}
+      
+      .tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 20px; }
+      .tab-btn { padding: 10px 2px; text-align: center; border-radius: 10px; cursor: pointer; border: none; background: #fff; color: #666; font-weight: 500; font-size: 11px; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+      .tab-btn.active { background: #333; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
+      
+      .sub-tabs { display: flex; gap: 6px; margin-bottom: 15px; }
+      .sub-tab-btn { flex: 1; padding: 8px; text-align: center; border-radius: 8px; cursor: pointer; border: none; background: #fff; color: #555; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
+      .sub-tab-btn.active { background: #333; color: white; }
+
+      button.submit-btn { width: 100%; background-color: #333; color: white; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);}
+      button.submit-btn:hover { background-color: #222; }
+      
+      .stats-card { background: #ffffff; padding: 20px; border-radius: 16px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); text-align: center;}
+      .stats-card .title { font-size: 13px; color: #888; margin-bottom: 6px; }
+      .stats-card .amount { font-size: 32px; font-weight: 700; color: #111; margin-bottom: 10px; }
+      .stats-card .footer-info { font-size: 12px; color: #999; display: flex; justify-content: center; gap: 15px; }
+
+      .cat-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; font-weight: 500;}
+      .cat-bar-bg { background: #f0f0f0; border-radius: 10px; height: 8px; margin-bottom: 18px; overflow: hidden; }
+      .cat-bar-fill { background: #3E7B5D; height: 100%; border-radius: 10px; transition: width 0.5s ease; }
+      
+      .member-card { background: white; border-radius: 20px; padding: 18px; margin-bottom: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s; border: 1px solid #fff;}
+      .member-card:active { transform: scale(0.98); border-color: #eee;}
+      .mc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+      .mc-avatar-name { display: flex; align-items: center; gap: 12px; font-weight: bold; font-size: 18px; color: #222;}
+      .mc-avatar { width: 42px; height: 42px; background: #3E7B5D; font-weight: bold; color: white; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+      .mc-badge { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+      .mc-badge.positive { background: #ECFDF5; color: #059669; }
+      .mc-badge.negative { background: #fdedec; color: #c0392b; }
+      .mc-stats { display: flex; gap: 10px; }
+      .mc-stat-box { flex: 1; background: #FCFBF8; padding: 12px 14px; border-radius: 14px; }
+      .mc-stat-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+      .mc-stat-val { font-size: 16px; font-weight: bold; }
+
+      .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.48); z-index: 99999; box-sizing: border-box; }
+      .modal-overlay:not(.center-modal) .modal-content { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; max-height: 85dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fafafa; padding: 22px 18px calc(24px + env(safe-area-inset-bottom, 0px)) 18px; border-radius: 24px 24px 0 0; box-shadow: 0 -6px 25px rgba(0,0,0,0.14); margin: 0; box-sizing: border-box; z-index: 100000; animation: slideUpSheet 0.22s ease-out; }
+      .modal-overlay.center-modal .modal-content { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 28px); max-width: 400px; max-height: 85dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #fff; padding: 22px 18px; border-radius: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin: 0; box-sizing: border-box; z-index: 100000; }
+      @keyframes slideUpSheet { from { transform: translate(-50%, 100%); } to { transform: translate(-50%, 0); } }
+      .modal-content.box-card { background: #fff; }
+      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+      .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+      .close-modal { background: #eee; border: none; font-size: 16px; cursor: pointer; color: #333; width: 32px; height: 32px; border-radius: 50%; display:flex; justify-content:center; align-items:center; }
+      
+      .modal-item-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 0; border-bottom: 1px solid #f0f0f0; }
+      .modal-item-left { flex: 1; padding-right: 12px; }
+      .mi-title { font-size: 15px; font-weight: 600; color: #222; margin-bottom: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px;}
+      .mi-sub { font-size: 12px; color: #777; display: flex; flex-direction: column; gap: 4px; line-height: 1.4;}
+      .modal-item-right { text-align: right; white-space: nowrap; }
+      .mi-amt { font-size: 16px; font-weight: bold; color: #111; margin-bottom: 2px;}
+      .mi-calc { font-size: 11px; color: #999; }
+      
+      .history-item { 
+        background: #fff; 
+        border: 1px solid #EAE6DF; 
+        padding: 14px 16px; 
+        border-radius: 16px; 
+        margin-bottom: 12px; 
+        font-size: 13px; 
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        transition: 0.2s;
+      }
+      .history-item:hover {
+        border-color: #d8cebe;
+      }
+      .history-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 6px;
+      }
+      .history-card-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #222;
+        line-height: 1.4;
+        word-break: break-word;
+      }
+      .history-card-amount {
+        font-size: 16px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .history-card-meta {
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 12px;
+        align-items: center;
+      }
+      .history-card-divider {
+        height: 1px;
+        background: #f2ece4;
+        margin: 10px 0;
+      }
+      .history-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .history-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-left: auto;
+      }
+      .clean-action-btn {
+        background: #FAF9F5;
+        border: 1px solid #EAE6DF;
+        border-radius: 8px;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        color: #444;
+        font-family: 'Prompt', sans-serif;
+        transition: 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+      }
+      .clean-action-btn:active {
+        background: #E2E8F0;
+      }
+      .clean-action-btn.del {
+        background: #fdedec;
+        border-color: #fadbd8;
+        color: #c0392b;
+      }
+      .clean-action-btn.del:active {
+        background: #f5b7b1;
+      }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: 0.15s;
+      }
+      .status-pill.cleared {
+        background: #ECFDF5;
+        color: #059669;
+        border-color: #a9dfbf;
+      }
+      .status-pill.pending {
+        background: #fef9e7;
+        color: #b7950b;
+        border-color: #f9e79f;
+      }
+      table.summary-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 15px; background: white; border-radius: 10px; overflow: hidden;}
+      table.summary-table th, table.summary-table td { border: 1px solid #eee; padding: 10px; text-align: center; }
+      table.summary-table th { background-color: #f9f9f9; color: #333; font-weight: bold; }
+
+      .status-banner { padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 500; text-align: center; margin-top: 12px; display: none; }
+      .status-banner.success { background: #ECFDF5; color: #059669; border: 1px solid #a9dfbf; display: block; }
+      .status-banner.error { background: #fdedec; color: #c0392b; border: 1px solid #fadbd8; display: block; }
+
+      .receipt-upload-box { background: #fff; border: 1px dashed #ccc; border-radius: 12px; padding: 10px 12px; margin-bottom: 15px; font-size: 13px; }
+      .receipt-badge-btn { background: #ebf5fb; color: #2874a6; border: 1px solid #aed6f1; border-radius: 6px; padding: 2px 7px; font-size: 11px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 3px; text-decoration: none; }
+      .action-icon-btn { background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 6px; padding: 3px 7px; font-size: 11px; cursor: pointer; color: #333; }
+      .action-icon-btn.del { background: #fdedec; border-color: #fadbd8; color: #c0392b; }
+      .settle-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: #FCFBF8; border-radius: 12px; margin-bottom: 8px; font-size: 13px; border: 1px solid #f0ece6; }
+    
+      /* Responsive & Text Overflow Fixes */
+      table.summary-table th, table.summary-table td { padding: 8px 4px; font-size: 12px; word-break: break-word; }
+      .mc-header { gap: 8px; flex-wrap: wrap; }
+      .mc-avatar-name { font-size: 16px; }
+      .mc-badge { padding: 5px 10px; font-size: 12px; white-space: nowrap; }
+      .mc-stat-box { padding: 10px; min-width: 0; }
+      .mc-stat-val { font-size: 14px; word-break: break-all; }
+      .stats-card .amount { font-size: 28px; word-break: break-all; }
+      .stats-card .footer-info { flex-wrap: wrap; gap: 8px 12px; }
+      .sub-tab-btn { font-size: 12px; padding: 8px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .settle-row { gap: 8px; }
+      .settle-row > div:first-child { word-break: break-word; }
+
+      /* Bottom Navigation Bar (Warm Cream & Mint Green App Theme) */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        max-width: 440px;
+        background: #ffffff;
+        border-top: 1px solid #EAE6DF;
+        display: none;
+        grid-template-columns: repeat(5, 1fr);
+        align-items: center;
+        padding: 8px 4px calc(10px + env(safe-area-inset-bottom, 0px)) 4px;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.06);
+        border-radius: 22px 22px 0 0;
+        z-index: 9000;
+      }
+      .bnav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #888888;
+        font-size: 10px;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        padding: 4px 2px;
+        transition: 0.2s;
+        font-family: 'Prompt', sans-serif;
+        position: relative;
+      }
+      .bnav-item.active {
+        color: #3E7B5D;
+        font-weight: 700;
+      }
+      .bnav-icon {
+        font-size: 20px;
+        margin-bottom: 3px;
+        line-height: 1;
+        transition: transform 0.15s;
+      }
+      .bnav-item.active .bnav-icon {
+        transform: scale(1.1);
+      }
+      .bnav-badge {
+        position: absolute;
+        top: 2px;
+        right: 16%;
+        background: #e74c3c;
+        color: #fff;
+        font-size: 9px;
+        font-weight: bold;
+        min-width: 15px;
+        height: 15px;
+        border-radius: 10px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+      }
+
+      /* Center Plus Button (Mint Green Theme) */
+      .bnav-center-wrap {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
+      .bnav-plus-btn {
+        width: 48px;
+        height: 36px;
+        background: #3E7B5D;
+        color: #ffffff;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(69, 179, 157, 0.35);
+        transition: transform 0.15s, background 0.2s;
+        border: none;
+        cursor: pointer;
+      }
+      .bnav-plus-btn:active {
+        transform: scale(0.92);
+        background: #32644C;
+      }
+
+      /* Quick Action Sheet for Center + Button */
+      .quick-action-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .qa-btn {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 14px;
+        padding: 14px 10px;
+        text-align: center;
+        cursor: pointer;
+        font-family: 'Prompt', sans-serif;
+        transition: 0.2s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      }
+      .qa-btn:active {
+        transform: scale(0.97);
+        background: #f5fafb;
+      }
+      .qa-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+      .qa-title { font-size: 13px; font-weight: bold; color: #222; display: block; }
+      .qa-sub { font-size: 11px; color: #888; display: block; margin-top: 2px; }
+    
+      /* iOS Safari Font & Form Control Normalization (Bulletproof) */
+      *, *::before, *::after {
+        box-sizing: border-box;
+        font-family: 'Prompt', -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      button, input, select, textarea {
+        font-family: 'Prompt', sans-serif !important;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      input[type="checkbox"] {
+        -webkit-appearance: checkbox;
+        appearance: checkbox;
+      }
+      input[type="radio"] {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      /* Bulletproof fix for iOS Safari <input type="date"> intrinsic min-width overflow */
+      input[type="date"] {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: 46px !important;
+        min-height: 46px !important;
+        padding: 10px 12px !important;
+        line-height: 24px !important;
+        text-align: left !important;
+        background-color: #ffffff !important;
+        color: #222222 !important;
+        overflow: hidden !important;
+        contain: inline-size;
+      }
+      input[type="date"]::-webkit-date-and-time-value {
+        text-align: left !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+      }
+      input[type="date"]::-webkit-datetime-edit {
+        min-width: 0 !important;
+        padding: 0 !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* Use CSS Grid with minmax(0, 1fr) for .row-2 so Safari NEVER lets children overflow */
+      .row-2 {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+        gap: 10px !important;
+        width: 100% !important;
+      }
+      .row-2 > div {
+        min-width: 0 !important;
+        width: 100% !important;
+        overflow: hidden;
+      }
+
+      /* Restore dropdown arrow on select after -webkit-appearance: none */
+      select {
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 16px;
+        padding-right: 34px;
+      }
+
+      /* Prevent Bottom Nav from overlapping bottom content & unlock history scrolling */
+      .container {
+        padding-bottom: calc(105px + env(safe-area-inset-bottom, 0px)) !important;
+      }
+      #dailyHistoryContainer,
+      #historyListContainer,
+      #prePostListContainer,
+      #todoListContainer {
+        max-height: none !important;
+        overflow-y: visible !important;
+      }
+
+      /* Consistent button styling across all sub-tabs and action buttons */
+      .sub-tab-btn, .tab-btn, .chip-label, .action-icon-btn, .receipt-badge-btn, .bnav-item {
+        font-family: 'Prompt', sans-serif !important;
+      }
+      .history-item .h-details label {
+        width: auto !important;
+        margin-bottom: 0 !important;
+      }
+    
+      .calc-btn {
+        touch-action: manipulation;
+        background: #fcfbf8;
+        border: 1px solid #eae6df;
+        border-radius: 12px;
+        padding: 14px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        cursor: pointer;
+        transition: 0.15s;
+        font-family: 'Prompt', sans-serif;
+      }
+      .calc-btn:active {
+        background: #e2e8f0;
+        transform: scale(0.95);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Trip Planner ✈️</h2>
+      <div id="loader" style="text-align: center; padding: 20px; color:#555;">กำลังโหลดข้อมูล...</div>
+      
+      <div id="viewAllTrips" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+          <span style="font-size: 16px; font-weight: bold; color:#333;">เลือกทริปของคุณ</span>
+          <button id="btnBackToCurrentTrip" style="display:none; background:#fff; border:1px solid #ddd; border-radius:20px; padding:5px 12px; font-size:12px; cursor:pointer; color:#333; font-family:'Prompt',sans-serif;" onclick="showView('viewTripDetail')">◀ กลับไปทริปปัจจุบัน</button>
+        </div>
+        <div id="tripListContainer"></div>
+        <button class="submit-btn" style="background-color: #3E7B5D; margin-top: 15px;" onclick="showView('viewNewTrip')">➕ สร้างทริปใหม่</button>
+      </div>
+
+      <div id="viewNewTrip" style="display:none;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+          <span style="font-weight:bold; font-size:16px;">สร้างทริปใหม่</span>
+          <button style="background:none; border:none; color:#555; font-weight:bold; cursor:pointer;" onclick="showView('viewAllTrips')">◀ กลับ</button>
+        </div>
+        <form onsubmit="submitNewTrip(event)">
+          <label>ชื่อทริป</label>
+          <input type="text" id="newTripName" placeholder="เช่น ซิงเต่า Trip 2026" required>
+          <label>รายชื่อสมาชิก (คั่นด้วยลูกน้ำ)</label>
+          <input type="text" id="newTripMembers" placeholder="เช่น Bow, Ink, Paii" required>
+          <div class="row-2">
+            <div><label>สกุลเงินหลัก</label><input type="text" id="newDefaultCurrency" value="CNY" required maxlength="3"></div>
+            <div><label>เรทเริ่มต้น (บาท)</label><input type="number" id="newDefaultRate" value="5.17" step="0.0001" required></div>
+          </div>
+          <button type="submit" class="submit-btn" id="btnTrip">✨ สร้างทริป</button>
+        </form>
+        <div id="statusNewTrip" class="status-banner"></div>
+      </div>
+
+      <div id="viewTripDetail" style="display:none; flex:1; flex-direction:column;">
+        <!-- Compact Top Header (Always visible, very slim) -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center; gap: 8px;">
+          <div style="min-width:0; flex:1;">
+            <div id="currentTripTitle" style="font-weight: bold; font-size: 17px; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">ชื่อทริป</div>
+            <div id="compactFundBar" style="font-size: 11px; color: #666; margin-top: 2px; display:none;">
+              👛 กองกลาง: <b style="color:#059669;" id="compactFundDisplay">฿0.00</b> • รวมจ่าย: <b style="color:#333;" id="compactExpenseDisplay">฿0.00</b>
+            </div>
+          </div>
+          <button id="btnChangeTrip" style="background:#fff; border:1px solid #ddd; border-radius:20px; padding:6px 12px; font-size:12px; cursor:pointer; white-space:nowrap; flex-shrink:0;" onclick="showView('viewAllTrips')">🔄 เปลี่ยนทริป</button>
+        </div>
+
+        <div id="closedNoticeBox" style="background: #fcf3cf; border: 1px solid #f9e79f; color: #7d6608; padding: 10px 12px; border-radius: 12px; margin-bottom: 12px; text-align: center; font-size: 12px; display: none;">
+          🔒 <b>ทริปนี้ปิดแล้ว</b> นำยอดทั้งหมด (ก่อน/ระหว่าง/หลัง) มารวมเรียบร้อย
+        </div>
+
+        <div id="activeSectionHeader" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding:0 4px;">
+          <span id="activeSectionTitle" style="font-size:15px; font-weight:700; color:#333;">🏠 ภาพรวมทริป</span>
+          <span id="activeSectionSub" style="font-size:11px; color:#888;">Dashboard</span>
+        </div>
+
+        <!-- Home Dashboard View (แสดงเฉพาะหน้าแรก) -->
+        <div id="homeDashboardWrapper">
+          <div class="stats-card">
+            <div class="title" id="statsTitleLabel">ใช้จ่ายรวม (ระหว่างเที่ยว)</div>
+            <div class="amount" id="totalExpenseDisplay">฿0.00</div>
+            <div class="footer-info">
+              <span id="statMembers">0 คน</span>
+              <span id="statAverage">เฉลี่ย ฿0.00/คน</span>
+              <span id="statCount">0 รายการ</span>
+            </div>
+          </div>
+
+          <div style="background: #fff; border-radius: 16px; padding: 14px 18px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.02); gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width:0;">
+              <div style="font-size: 22px; background: #ECFDF5; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 12px; flex-shrink:0;">👛</div>
+              <div style="flex: 1; min-width:0;">
+                <div style="font-size: 12px; color: #888; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">เงินกองกลางคงเหลือ</div>
+                <div style="font-size: 18px; font-weight: bold; color: #059669;" id="fundBalanceDisplay">฿0.00</div>
+              </div>
+            </div>
+            <button style="background: #3E7B5D; color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-size: 12px; font-weight: bold; cursor: pointer; white-space:nowrap; flex-shrink:0;" onclick="switchTab('Fund')">+ เติมเงิน</button>
+          </div>
+
+          <!-- Pinned Note Card on Dashboard -->
+          <div id="homePinnedNoteCard" style="background: #fff; border-radius: 16px; padding: 15px 18px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:8px;">
+              <span style="font-size:13px; font-weight:bold; color:#333; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">📌 โน้ตสำคัญของทริป</span>
+              <button type="button" onclick="switchTab('Todo'); switchTodoSubTab('TripNote');" style="background:none; border:none; color:#3E7B5D; font-size:11px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif; flex-shrink:0;">แก้ไข</button>
+            </div>
+            <div id="homePinnedNoteContent" style="font-size:13px; color:#555; white-space:pre-line; line-height:1.5; background:#FCFBF8; padding:10px 12px; border-radius:10px;"></div>
+          </div>
+
+          <!-- Pending Checklist Card on Dashboard -->
+          <!-- Quick Currency Converter Widget on Home Dashboard -->
+          <div style="background: #fff; border-radius: 16px; padding: 16px 18px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); cursor:pointer; border:1px solid #ECFDF5; touch-action: manipulation;" onclick="openQuickCalcModal()">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+              <div style="display:flex; align-items:center; gap:10px; min-width:0; flex:1;">
+                <div style="font-size:22px; background:#ECFDF5; width:40px; height:40px; display:flex; align-items:center; justify-content:center; border-radius:12px; flex-shrink:0;">🧮</div>
+                <div style="min-width:0; flex:1;">
+                  <div style="font-size:12px; color:#888; margin-bottom:2px;">เครื่องคำนวณเรทเงินด่วน</div>
+                  <div style="font-size:14px; font-weight:bold; color:#3E7B5D; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" id="homeCalcPreview">กดเพื่อเปิดแป้นคำนวณ (<span id="homeCalcCurr">CNY</span>)</div>
+                </div>
+              </div>
+              <button type="button" onclick="event.stopPropagation(); openQuickCalcModal();" style="font-size:13px; color:#3E7B5D; font-weight:bold; background:#ECFDF5; border:none; padding:8px 12px; border-radius:10px; cursor:pointer; white-space:nowrap; flex-shrink:0; touch-action: manipulation;">เปิดใช้งาน ➔</button>
+            </div>
+          </div>
+
+          <div id="homePendingTodoCard" style="background: #fff; border-radius: 16px; padding: 15px 18px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span style="font-size:13px; font-weight:bold; color:#333;">✅ เช็คลิสต์ที่ยังไม่เสร็จ</span>
+              <button type="button" onclick="switchTab('Todo')" style="background:none; border:none; color:#3E7B5D; font-size:11px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">ดูทั้งหมด ➔</button>
+            </div>
+            <div id="homePendingTodoList"></div>
+          </div>
+
+          <!-- Recent Expenses Card on Dashboard -->
+          <div style="background: #fff; border-radius: 16px; padding: 15px 18px; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.02);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span style="font-size:13px; font-weight:bold; color:#333;">🕒 รายการล่าสุด</span>
+              <button type="button" onclick="switchTab('Summary'); switchSubTab('All');" style="background:none; border:none; color:#3E7B5D; font-size:11px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">ประวัติทั้งหมด ➔</button>
+            </div>
+            <div id="homeRecentExpensesList"><p style="text-align:center; color:#888; font-size:12px; margin:8px 0;">กำลังโหลดรายการล่าสุด...</p></div>
+          </div>
+        </div>
+
+        <div id="rateAlertBox" style="background: #fff3f3; border: 1px solid #ffcccc; color: #c0392b; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 13px; display: none; text-align: center;">
+          ⚠️ <b>ยังไม่มีเรทเงินวันนี้!</b> กรุณาไปตั้งค่าเรทเงินก่อน
+        </div>
+
+        <div id="mainFormWrapper">
+          <form id="expenseForm" onsubmit="submitExpense(event)">
+            <input type="hidden" id="entryType" value="Expense">
+            <input type="hidden" id="period" value="ระหว่างเที่ยว">
+
+            <label>วันที่</label>
+            <input type="date" id="date" onchange="onDateChange()" required>
+
+            <label>รายการ</label>
+            <input type="text" id="description" placeholder="เช่น ค่าอาหาร, ค่าเดินทาง" required>
+
+            <div id="categoryWrapper">
+              <label>หมวดหมู่</label>
+              <div class="chip-group" id="categoryChipGroup">
+                <div class="chip-item"><input type="radio" id="cat1" name="category" value="🍜 อาหาร" checked><label class="chip-label" for="cat1">🍜 อาหาร</label></div>
+                <div class="chip-item"><input type="radio" id="cat2" name="category" value="🚇 เดินทาง"><label class="chip-label" for="cat2">🚇 เดินทาง</label></div>
+                <div class="chip-item"><input type="radio" id="cat3" name="category" value="🏨 ที่พัก"><label class="chip-label" for="cat3">🏨 ที่พัก</label></div>
+                <div class="chip-item"><input type="radio" id="cat4" name="category" value="🎟️ กิจกรรม"><label class="chip-label" for="cat4">🎟️ กิจกรรม</label></div>
+                <div class="chip-item"><input type="radio" id="cat5" name="category" value="🛍️ ช้อปปิ้ง"><label class="chip-label" for="cat5">🛍️ ช้อปปิ้ง</label></div>
+                <div class="chip-item"><input type="radio" id="cat6" name="category" value="🏷️ อื่นๆ"><label class="chip-label" for="cat6">🏷️ อื่นๆ</label></div>
+              </div>
+            </div>
+
+            <div class="row-2">
+              <div><label>สกุลเงิน</label><select id="currency" onchange="updateRateUI()"></select></div>
+              <div><label>เรทเงิน (บาท)</label><input type="number" id="rate" value="1" step="0.0001" oninput="calculateTHB()" required></div>
+            </div>
+
+            <label id="amountLabel">ยอดเงินรวม</label>
+            <input type="number" id="amount" placeholder="0.00" step="0.01" oninput="calculateTHB()" required>
+            <label style="color: #666; font-size: 13px; text-align:right;">คิดเป็นเงินไทย: <b style="color:#222; font-size:15px;" id="thbDisplay">0.00</b> ฿</label>
+            <br>
+
+            <div id="singlePayerWrapper">
+              <label>ใครจ่ายบิลนี้?</label>
+              <div class="chip-group" id="paidByChipGroup"></div>
+            </div>
+
+            <div id="splitWrapper">
+              <label>หารเงินจากใครบ้าง?</label>
+              <div class="checkbox-group" id="splitMembers"></div>
+            </div>
+
+            <div id="fundWrapper" style="display:none;">
+              <label>ใครเติมเงินเข้ากองกลางบ้าง?</label>
+              <div class="checkbox-group" id="fundMembers"></div>
+            </div>
+
+            <div class="receipt-upload-box">
+              <label style="margin-bottom:6px; font-size:13px;">🧾 แนบรูปใบเสร็จ / สลิป (ไม่บังคับ)</label>
+              <input type="file" id="mainReceiptFile" accept="image/*" style="margin-bottom:0; padding:6px; font-size:12px;">
+            </div>
+
+            <button type="submit" class="submit-btn" id="btnExpense">บันทึกค่าใช้จ่าย</button>
+            <div id="statusMain" class="status-banner"></div>
+          </form>
+        </div>
+
+        <div id="prePostWrapper" style="display:none;">
+          <div style="display:flex; gap:6px; margin-bottom:12px; background:#E2E8F0; padding:4px; border-radius:10px;">
+            <button type="button" onclick="switchTab('PrePost')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:#fff; color:#222;">✈️ ค่าใช้จ่ายทริป</button>
+            <button type="button" onclick="switchTab('Todo')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">✅ เช็คลิสต์</button>
+            <button type="button" onclick="switchTab('Settings')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">⚙️ ตั้งค่า</button>
+          </div>
+          <div class="sub-tabs">
+            <div class="sub-tab-btn active" id="subTabPPRecord" onclick="switchPPSubTab('Record')">📝 บันทึก</div>
+            <div class="sub-tab-btn" id="subTabPPSummary" onclick="switchPPSubTab('Summary')">📊 สรุปประวัติ</div>
+          </div>
+
+          <div id="viewPPRecord">
+            <div style="background: #fff; padding: 12px; border-radius: 12px; margin-bottom: 15px;">
+              <label style="font-weight: bold; margin-bottom: 8px;">ช่วงเวลาที่ต้องการบันทึก:</label>
+              <div class="chip-group" style="margin-bottom:0;">
+                <div class="chip-item" style="min-width: calc(50% - 4px);"><input type="radio" id="ppPer1" name="prePostPeriod" value="ก่อนออกเดินทาง" checked><label class="chip-label" for="ppPer1">✈️ ก่อนเดินทาง</label></div>
+                <div class="chip-item" style="min-width: calc(50% - 4px);"><input type="radio" id="ppPer2" name="prePostPeriod" value="หลังออกเดินทาง"><label class="chip-label" for="ppPer2">🏁 หลังเดินทาง</label></div>
+              </div>
+            </div>
+
+            <form onsubmit="submitPrePostExpense(event)">
+              <label>วันที่</label><input type="date" id="ppDate" required>
+              <label>รายการ</label><input type="text" id="ppDescription" placeholder="เช่น ค่าตั๋วเครื่องบิน" required>
+              <div class="row-2">
+                <div><label>สกุลเงิน</label><select id="ppCurrency" onchange="updatePPRateUI()"></select></div>
+                <div><label>เรทเงิน (บาท)</label><input type="number" id="ppRate" value="1" step="0.0001" oninput="calculatePPTHB()" required></div>
+              </div>
+              <label>ยอดเงินรวม</label><input type="number" id="ppAmount" step="0.01" oninput="calculatePPTHB()" required>
+              <label style="color: #666; font-size: 13px; text-align:right;">คิดเป็นเงินไทย: <b style="color:#222;" id="ppThbDisplay">0.00</b> ฿</label>
+              <br>
+              <label style="font-weight: bold;">สถานะการจ่ายเงิน:</label>
+              <div class="chip-group">
+                <div class="chip-item" style="min-width: calc(50% - 4px);"><input type="radio" id="statNotClear" name="ppClearStatus" value="ยังไม่จ่ายเงิน" checked><label class="chip-label" for="statNotClear">⏳ ค้างจ่าย (นำไปหาร)</label></div>
+                <div class="chip-item" style="min-width: calc(50% - 4px);"><input type="radio" id="statCleared" name="ppClearStatus" value="จ่ายเงินแล้ว"><label class="chip-label" for="statCleared">✅ จ่ายแล้ว (ไม่นำไปหาร)</label></div>
+              </div>
+              <label>ใครออกเงินไปก่อน?</label><div class="chip-group" id="ppPaidByChipGroup"></div>
+              <label>หารเงินจากใครบ้าง?</label><div class="checkbox-group" id="ppSplitMembers"></div>
+              <div class="receipt-upload-box">
+                <label style="margin-bottom:6px; font-size:13px;">🧾 แนบรูปใบเสร็จ / สลิป (ไม่บังคับ)</label>
+                <input type="file" id="ppReceiptFile" accept="image/*" style="margin-bottom:0; padding:6px; font-size:12px;">
+              </div>
+              <button type="submit" class="submit-btn" id="btnPPExpense" style="background-color: #3E7B5D;">บันทึกค่าใช้จ่าย</button>
+              <div id="statusPP" class="status-banner"></div>
+            </form>
+          </div>
+
+          <div id="viewPPSummary" style="display:none;">
+            <div style="font-size: 15px; font-weight: bold; margin-bottom:8px;">👥 สรุปยอดค้างจ่ายรายคน (ก่อน/หลังทริป)</div>
+            <p style="font-size: 11px; color: #888; margin-bottom: 10px;">* คำนวณเฉพาะรายการที่ "ยังไม่จ่ายเงิน"</p>
+            <div id="prePostSummaryContainer" style="overflow-x: auto; margin-bottom: 25px;"></div>
+            
+            <div style="font-size: 15px; font-weight: bold; margin-bottom:10px;">📋 ประวัติรายการ</div>
+            <div style="background: #fff; padding: 10px; border-radius: 12px; margin-bottom: 12px;">
+              <div class="chip-group" style="margin-bottom:0;">
+                <div class="chip-item" style="min-width: calc(50% - 4px);"><input type="radio" id="ppHist1" name="prePostHistPeriod" value="ก่อนออกเดินทาง" checked onchange="loadPrePostItems()"><label class="chip-label" for="ppHist1">ก่อนเดินทาง</label></div>
+                <div class="chip-item" style="min-width: calc(50% - 4px);"><input type="radio" id="ppHist2" name="prePostHistPeriod" value="หลังออกเดินทาง" onchange="loadPrePostItems()"><label class="chip-label" for="ppHist2">หลังเดินทาง</label></div>
+              </div>
+            </div>
+            <div id="prePostListContainer" style="overflow-y: auto;"></div>
+          </div>
+        </div>
+
+        <div id="summaryFormWrapper" style="display:none; flex:1; flex-direction:column;">
+          <div class="sub-tabs">
+            <div class="sub-tab-btn active" id="subTabSummary" onclick="switchSubTab('Summary')">👥 สรุปรายคน</div>
+            <div class="sub-tab-btn" id="subTabDaily" onclick="switchSubTab('Daily')">📅 รายวัน</div>
+            <div class="sub-tab-btn" id="subTabAll" onclick="switchSubTab('All')">📋 ประวัติทั้งหมด</div>
+          </div>
+
+          <div id="viewSummaryPerson">
+
+            <div id="personSummaryContainer">
+              <p style="text-align:center; color:#777; padding:20px;">กำลังคำนวณยอด...</p>
+            </div>
+          </div>
+
+          <div id="viewSummaryDaily" style="display:none; flex:1; flex-direction:column;">
+            <input type="date" id="filterDate" onchange="renderDailyHistory()" style="margin-bottom: 15px;">
+            <div id="dailyHistoryContainer" style="flex: 1; overflow-y: auto;"></div>
+          </div>
+
+          <div id="viewSummaryAll" style="display:none; flex:1; flex-direction:column;">
+            <div id="historyListContainer" style="flex: 1; overflow-y: auto;"></div>
+          </div>
+        </div>
+
+        <div id="todoFormWrapper" style="display:none;">
+          <div style="display:flex; gap:6px; margin-bottom:12px; background:#E2E8F0; padding:4px; border-radius:10px;">
+            <button type="button" onclick="switchTab('PrePost')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">✈️ ค่าใช้จ่ายทริป</button>
+            <button type="button" onclick="switchTab('Todo')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:#fff; color:#222;">✅ เช็คลิสต์</button>
+            <button type="button" onclick="switchTab('Settings')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">⚙️ ตั้งค่า</button>
+          </div>
+          <div class="sub-tabs">
+            <div class="sub-tab-btn active" id="subTabTodoList" onclick="switchTodoSubTab('TodoList')">✅ เช็คลิสต์</div>
+            <div class="sub-tab-btn" id="subTabTripNote" onclick="switchTodoSubTab('TripNote')">📌 โน้ต</div>
+          </div>
+          <div id="viewTodoTodoList">
+            <form onsubmit="submitNewTodo(event)" style="margin-bottom: 15px;">
+              <input type="text" id="newTodoText" placeholder="ชื่อรายการ เช่น จองตั๋วรถไฟ" required style="margin-bottom: 8px;">
+              <textarea id="newTodoNote" placeholder="รายละเอียดเพิ่มเติม" style="margin-bottom: 8px; min-height: 50px;"></textarea>
+              <button type="submit" class="submit-btn" id="btnAddTodo" style="padding: 10px;">➕ เพิ่มรายการ</button>
+              <div id="statusTodo" class="status-banner"></div>
+            </form>
+            <div id="todoListContainer" style="overflow-y: auto;"></div>
+          </div>
+          <div id="viewTodoTripNote" style="display:none;">
+            <form onsubmit="submitTripNote(event)">
+              <textarea id="tripNoteText" placeholder="พิมพ์โน้ตทริปที่นี่..."></textarea>
+              <button type="submit" class="submit-btn" id="btnSaveNote" style="padding: 10px;">💾 บันทึกโน้ต</button>
+              <div id="statusNote" class="status-banner"></div>
+            </form>
+          </div>
+        </div>
+
+        <div id="settingsFormWrapper" style="display:none;">
+          <div style="display:flex; gap:6px; margin-bottom:12px; background:#E2E8F0; padding:4px; border-radius:10px;">
+            <button type="button" onclick="switchTab('PrePost')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">✈️ ค่าใช้จ่ายทริป</button>
+            <button type="button" onclick="switchTab('Todo')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">✅ เช็คลิสต์</button>
+            <button type="button" onclick="switchTab('Settings')" style="flex:1; border:none; border-radius:8px; padding:6px 4px; font-size:11px; font-weight:600; cursor:pointer; font-family:'Prompt',sans-serif; background:#fff; color:#222;">⚙️ ตั้งค่า</button>
+          </div>
+          <div class="sub-tabs">
+            <div class="sub-tab-btn active" id="subTabEditTrip" onclick="switchSettingsSubTab('EditTrip')">✏️ แก้ไข</div>
+            <div class="sub-tab-btn" id="subTabRates" onclick="switchSettingsSubTab('Rates')">💱 เรทเงิน</div>
+            <div class="sub-tab-btn" id="subTabStatus" onclick="switchSettingsSubTab('Status')">🏁 ปิดทริป</div>
+          </div>
+          <div id="viewSettingsEditTrip">
+            <form onsubmit="submitUpdateTrip(event)">
+              <label>ชื่อทริป</label><input type="text" id="editTripName" required>
+              <label>สมาชิก</label><input type="text" id="editTripMembers" required>
+              <button type="submit" class="submit-btn" id="btnEditTrip">💾 บันทึกข้อมูลทริป</button>
+            </form>
+            <div id="statusEditTrip" class="status-banner"></div>
+          </div>
+          <div id="viewSettingsRates" style="display:none;">
+            <form onsubmit="submitNewRate(event)">
+              <div class="row-2">
+                <div><label>วันที่</label><input type="date" id="rateDate" required></div>
+                <div><label>สกุลเงิน</label><input type="text" id="newCurrency" readonly style="text-align:center;" required></div>
+              </div>
+              <label>เรทเงิน (บาท)</label><input type="number" id="newRate" step="0.0001" required>
+              <button type="submit" class="submit-btn" id="btnSaveRate">💾 บันทึกเรทเงิน</button>
+            </form>
+            <div id="statusSettings" class="status-banner"></div>
+            <div id="rateListContainer" style="max-height: 220px; overflow-y: auto; margin-top: 15px;"></div>
+          </div>
+          <div id="viewSettingsStatus" style="display:none; text-align: center; padding: 20px 0;">
+            <p style="font-size: 13px; color: #666; margin-bottom: 20px;">เมื่อจบทริปแล้ว กดปิดทริปเพื่อรวมยอดค่าใช้จ่ายทั้งหมด (ก่อน / ระหว่าง / หลังทริป) เข้าด้วยกัน</p>
+            <button type="button" onclick="confirmCloseTrip()" style="background: #333; color: white; border: none; padding: 14px 20px; border-radius: 12px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold;">🔒 ปิดทริปนี้</button>
+          </div>
+        </div>
+
+      </div>
+
+      
+    </div>
+
+    <!-- Bottom Navigation Bar (Fixed inside container) -->
+      <nav id="bottomNav" class="bottom-nav">
+        <button type="button" class="bnav-item active" id="bnavHome" onclick="switchTab('Home')">
+          <span class="bnav-icon">🏠</span>
+          <span>หน้าหลัก</span>
+        </button>
+        <button type="button" class="bnav-item" id="bnavExpense" onclick="switchTab('Expense')">
+          <span class="bnav-icon">💸</span>
+          <span>จ่าย</span>
+        </button>
+        <div class="bnav-center-wrap" onclick="openQuickActionModal()">
+          <button type="button" class="bnav-plus-btn" aria-label="เพิ่มรายการ" onclick="event.stopPropagation(); openQuickActionModal();" style="touch-action: manipulation;">+</button>
+        </div>
+        <button type="button" class="bnav-item" id="bnavSummary" onclick="switchTab('Summary')">
+          <span class="bnav-icon">📊</span>
+          <span>สรุป</span>
+        </button>
+        <button type="button" class="bnav-item" id="bnavMore" onclick="switchTab('PrePost')">
+          <span class="bnav-badge" id="bnavTodoBadge"></span>
+          <span class="bnav-icon">🧳</span>
+          <span>จัดการทริป</span>
+        </button>
+      </nav>
+
+    <!-- Modal ดูรายละเอียดรายคน -->
+    <div id="personModal" class="modal-overlay" onclick="if(event.target===this) closePersonModal()">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" style="background:#fff;">
+        <div class="modal-header">
+          <div id="modalPersonTitle"></div>
+          <button class="close-modal" onclick="closePersonModal()">✕</button>
+        </div>
+        <div id="modalPersonBody"></div>
+      </div>
+    </div>
+
+    <!-- Modal แก้ไขรายการเช็คลิสต์ -->
+    <div id="editTodoModal" class="modal-overlay center-modal" onclick="if(event.target===this) closeEditTodoModal()">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" style="max-width:400px; background:#fff;">
+        <div style="font-weight:bold; font-size:16px; margin-bottom:12px; color:#333;">✏️ แก้ไขรายการเช็คลิสต์</div>
+        <input type="hidden" id="editTodoId">
+        <label>ชื่อรายการ</label>
+        <input type="text" id="editTodoTextInput" required>
+        <label>รายละเอียดเพิ่มเติม</label>
+        <textarea id="editTodoNoteInput" style="min-height:70px;"></textarea>
+        <div class="row-2" style="margin-top:5px;">
+          <button type="button" onclick="closeEditTodoModal()" style="background:#eee; color:#333; border:none; padding:12px; border-radius:10px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">ยกเลิก</button>
+          <button type="button" id="btnSaveEditTodo" onclick="submitEditTodo()" style="background:#3E7B5D; color:#fff; border:none; padding:12px; border-radius:10px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">💾 บันทึก</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal แก้ไขบิลค่าใช้จ่าย / เติมกองกลาง -->
+    <div id="editExpenseModal" class="modal-overlay" onclick="if(event.target===this) closeEditExpenseModal()">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" style="background:#fff;">
+        <div class="modal-header">
+          <div style="font-weight:bold; font-size:17px; color:#222;">✏️ แก้ไขรายการ</div>
+          <button class="close-modal" onclick="closeEditExpenseModal()">✕</button>
+        </div>
+        <form onsubmit="submitEditExpense(event)">
+          <input type="hidden" id="editExpRowIndex">
+          <input type="hidden" id="editExpEntryType">
+          <input type="hidden" id="editExpPeriod">
+          <input type="hidden" id="editExpSourceView">
+
+          <label>วันที่</label>
+          <input type="date" id="editExpDate" required>
+
+          <label>รายการ</label>
+          <input type="text" id="editExpDesc" required>
+
+          <div id="editExpCatWrapper">
+            <label>หมวดหมู่</label>
+            <select id="editExpCategory">
+              <option value="🍜 อาหาร">🍜 อาหาร</option>
+              <option value="🚇 เดินทาง">🚇 เดินทาง</option>
+              <option value="🏨 ที่พัก">🏨 ที่พัก</option>
+              <option value="🎟️ กิจกรรม">🎟️ กิจกรรม</option>
+              <option value="🛍️ ช้อปปิ้ง">🛍️ ช้อปปิ้ง</option>
+              <option value="🏷️ อื่นๆ">🏷️ อื่นๆ</option>
+              <option value="🧳 เตรียมตัว/เบ็ดเตล็ด">🧳 เตรียมตัว/เบ็ดเตล็ด</option>
+            </select>
+          </div>
+
+          <div class="row-2">
+            <div><label>สกุลเงิน</label><select id="editExpCurrency"></select></div>
+            <div><label>เรทเงิน (บาท)</label><input type="number" id="editExpRate" step="0.0001" oninput="calculateEditExpTHB()" required></div>
+          </div>
+
+          <label>ยอดเงิน (ตามสกุลเงิน)</label>
+          <input type="number" id="editExpAmount" step="0.01" oninput="calculateEditExpTHB()" required>
+          <div style="font-size:12px; color:#666; text-align:right; margin-top:-10px; margin-bottom:12px;">คิดเป็นเงินไทย: <b id="editExpThbDisplay">0.00</b> ฿</div>
+
+          <label id="editExpPayerLabel">ผู้จ่ายเงิน</label>
+          <select id="editExpPaidBy"></select>
+
+          <div id="editExpSplitWrapper">
+            <label>คนที่ร่วมหาร</label>
+            <div class="checkbox-group" id="editExpSplitMembers"></div>
+          </div>
+
+          <div id="editExpClearWrapper" style="display:none;">
+            <label>สถานะการจ่ายเงิน</label>
+            <select id="editExpClearStatus">
+              <option value="ยังไม่จ่ายเงิน">⏳ ค้างจ่าย (นำไปหาร)</option>
+              <option value="จ่ายเงินแล้ว">✅ จ่ายแล้ว (ไม่นำไปหาร)</option>
+            </select>
+          </div>
+
+          <div class="receipt-upload-box">
+            <label style="margin-bottom:4px; font-size:13px;">🧾 เปลี่ยน / แนบรูปใบเสร็จใหม่</label>
+            <div id="editExpCurrentReceipt" style="margin-bottom:6px; font-size:12px;"></div>
+            <input type="file" id="editExpReceiptFile" accept="image/*" style="margin-bottom:0; padding:6px; font-size:12px;">
+          </div>
+
+          <button type="submit" class="submit-btn" id="btnSaveEditExp" style="background:#3E7B5D;">💾 บันทึกการแก้ไข</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal ดูรูปใบเสร็จ -->
+    <div id="receiptPreviewModal" class="modal-overlay center-modal" onclick="if(event.target===this) closeReceiptModal()">
+      <div class="modal-content box-card" style="max-width:420px; text-align:center;">
+        <div class="modal-header">
+          <div style="font-weight:bold; font-size:16px;">🧾 หลักฐานใบเสร็จ / สลิป</div>
+          <button class="close-modal" onclick="closeReceiptModal()">✕</button>
+        </div>
+        <img id="receiptPreviewImg" src="" alt="Receipt" style="max-width:100%; max-height:60vh; border-radius:12px; object-fit:contain; background:#f5f5f5;">
+        <div style="margin-top:12px;">
+          <a id="receiptOpenDriveLink" href="#" target="_blank" style="font-size:13px; color:#2874a6; text-decoration:none; font-weight:500;">🔗 เปิดรูปเต็มใน Google Drive</a>
+        </div>
+      </div>
+    </div>
+
+            <!-- Modal เครื่องคำนวณเรทเงินด่วน (Quick Calculator) -->
+    <div id="quickCalcModal" class="modal-overlay center-modal" onclick="if(event.target===this) closeQuickCalcModal()">
+      <div class="modal-content box-card" onclick="event.stopPropagation()" style="max-width:380px; padding:20px;">
+        <div class="modal-header" style="margin-bottom:12px;">
+          <div style="font-weight:bold; font-size:15px; color:#222; display:flex; align-items:center; gap:6px;">
+            <span>🧮</span> คำนวณเรทเงินด่วน (<span id="calcCurrLabel">KRW</span> ➔ THB)
+          </div>
+          <button class="close-modal" onclick="closeQuickCalcModal()">✕</button>
+        </div>
+        
+        <!-- Direction Toggle Bar -->
+        <div style="display:flex; align-items:center; justify-content:space-between; background:#E2E8F0; padding:4px; border-radius:10px; margin-bottom:12px;">
+          <button type="button" id="calcMode1Btn" onclick="setCalcMode('foreignToThb')" style="flex:1; border:none; border-radius:8px; padding:6px; font-size:12px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif; background:#fff; color:#333;">💱 ต่างประเทศ ➔ บาท</button>
+          <button type="button" id="calcMode2Btn" onclick="setCalcMode('thbToForeign')" style="flex:1; border:none; border-radius:8px; padding:6px; font-size:12px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif; background:transparent; color:#666;">บาท ➔ ต่างประเทศ</button>
+        </div>
+
+        <!-- Display Box -->
+        <div style="background:#FAF9F5; border:1px solid #EAE6DF; border-radius:14px; padding:12px 16px; margin-bottom:14px; text-align:right;">
+          <div style="font-size:12px; color:#888; margin-bottom:2px;" id="calcInputDisplay">0</div>
+          <div style="font-size:24px; font-weight:bold; color:#059669;" id="calcResultDisplay">0.00 ฿</div>
+          <div style="font-size:11px; color:#aaa; margin-top:4px;" id="calcRateInfo">เรท: -</div>
+        </div>
+
+        <!-- Keypad Grid -->
+        <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin-bottom:14px;">
+          <button type="button" class="calc-btn" onclick="appendCalcKey('7')">7</button>
+          <button type="button" class="calc-btn" onclick="appendCalcKey('8')">8</button>
+          <button type="button" class="calc-btn" onclick="appendCalcKey('9')">9</button>
+          <button type="button" class="calc-btn" onclick="appendCalcKey('4')">4</button>
+          <button type="button" class="calc-btn" onclick="appendCalcKey('5')">5</button>
+          <button type="button" class="calc-btn" onclick="appendCalcKey('6')">6</button>
+          <button type="button" class="calc-btn" onclick="appendCalcKey('1')">1</button>
+          <button type="button" class="calc-btn" onclick="appendCalcKey('2')">2</button>
+          <button type="button" class="calc-btn" onclick="appendCalcKey('3')">3</button>
+          <button type="button" class="calc-btn" onclick="appendCalcKey('.')">.</button>
+          <button type="button" class="calc-btn" onclick="appendCalcKey('0')">0</button>
+          <button type="button" class="calc-btn" style="background:#fdedec; color:#c0392b;" onclick="appendCalcKey('C')">⌫</button>
+        </div>
+
+        <button type="button" onclick="closeQuickCalcModal()" style="width:100%; background:#333; color:#fff; border:none; border-radius:12px; padding:12px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">เสร็จสิ้น</button>
+      </div>
+    </div>
+    <!-- Quick Action Modal (ปุ่ม + ตรงกลาง) -->
+    <div id="quickActionModal" class="modal-overlay" onclick="if(event.target===this) closeQuickActionModal()">
+      <div class="modal-content" style="background:#FAF8F4; padding-bottom: 30px;">
+        <div class="modal-header" style="border-bottom-color:#EAE6DF;">
+          <div style="font-weight:bold; font-size:16px; color:#222;">⚡ เพิ่มรายการด่วน</div>
+          <button class="close-modal" onclick="closeQuickActionModal()">✕</button>
+        </div>
+        <div class="quick-action-grid">
+          <div class="qa-btn" onclick="closeQuickActionModal(); switchTab('Expense');">
+            <span class="qa-icon">💸</span>
+            <span class="qa-title">บันทึกค่าใช้จ่าย</span>
+            <span class="qa-sub">จ่ายระหว่างเที่ยว</span>
+          </div>
+          <div class="qa-btn" onclick="closeQuickActionModal(); switchTab('Fund');">
+            <span class="qa-icon">👛</span>
+            <span class="qa-title">เติมเงินกองกลาง</span>
+            <span class="qa-sub">เพิ่มงบส่วนกลาง</span>
+          </div>
+          <div class="qa-btn" onclick="closeQuickActionModal(); switchTab('PrePost');">
+            <span class="qa-icon">✈️</span>
+            <span class="qa-title">ค่าใช้จ่ายก่อน/หลังทริป</span>
+            <span class="qa-sub">ก่อน / หลังเดินทาง</span>
+          </div>
+          <div class="qa-btn" onclick="closeQuickActionModal(); switchTab('Todo');">
+            <span class="qa-icon">✅</span>
+            <span class="qa-title">เช็คลิสต์ & โน้ต</span>
+            <span class="qa-sub">สิ่งที่ต้องทำในทริป</span>
+          </div>
+          <div class="qa-btn" onclick="closeQuickActionModal(); openQuickCalcModal();">
+            <span class="qa-icon">🧮</span>
+            <span class="qa-title">คำนวณเรทเงินด่วน</span>
+            <span class="qa-sub">แป้นกดคำนวณไว</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <script>
+      // 🔗 วางลิงก์ Web App URL (/exec) ของ Google Apps Script ตรงนี้:
+      var GAS_API_URL = "https://script.google.com/macros/s/AKfycbx56YbJ22017i--N3aDGmeBGlftZxFMvccs7r6TdaHNCwmncCi2c3FrXszpYfP0pmec/exec";
+
+      // ตัวจำลอง google.script.run ให้วิ่งผ่าน fetch() JSON API อัตโนมัติสำหรับรันบน GitHub Pages
+      (function() {
+        function createRunner(successHandler, failureHandler) {
+          return new Proxy({}, {
+            get: function(target, prop) {
+              if (prop === 'withSuccessHandler') {
+                return function(fn) { return createRunner(fn, failureHandler); };
+              }
+              if (prop === 'withFailureHandler') {
+                return function(fn) { return createRunner(successHandler, fn); };
+              }
+              return function() {
+                var args = Array.prototype.slice.call(arguments);
+                if (!GAS_API_URL || GAS_API_URL.indexOf("http") !== 0) {
+                  if (failureHandler) failureHandler(new Error("กรุณาใส่ลิงก์ GAS_API_URL (/exec) ในไฟล์ index.html"));
+                  return;
+                }
+                fetch(GAS_API_URL, {
+                  method: "POST",
+                  headers: { "Content-Type": "text/plain;charset=utf-8" },
+                  body: JSON.stringify({ action: prop, args: args })
+                })
+                .then(function(response) {
+                  if (!response.ok) throw new Error("HTTP Error " + response.status);
+                  return response.json();
+                })
+                .then(function(data) {
+                  if (data && data.ok === false) {
+                    throw new Error(data.error || "Server error");
+                  }
+                  if (successHandler) successHandler(data ? data.result : null);
+                })
+                .catch(function(err) {
+                  if (failureHandler) {
+                    failureHandler(err);
+                  } else {
+                    console.error("API Error (" + prop + "):", err);
+                    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ: " + err.message);
+                  }
+                });
+              };
+            }
+          });
+        }
+        window.google = window.google || {};
+        window.google.script = window.google.script || {};
+        window.google.script.run = createRunner(null, null);
+      })();
+    </script>
+
+    <script>
+      var appData = { trips: [], rates: [], fundBalances: {}, tripNotes: {}, tripTodos: {} };
+      var selectedTripName = null;
+      var cachedPersonData = null;
+      var cachedFullHistory = [];
+      var cachedOverallSummary = null;
+      var lastSettlementCopyText = "";
+
+      window.onload = function() {
+        var today = new Date().toISOString().split('T')[0];
+        document.getElementById('date').value = today;
+        document.getElementById('ppDate').value = today;
+        document.getElementById('rateDate').value = today;
+        document.getElementById('filterDate').value = today;
+        loadAppData(false);
+      };
+
+      function compressImageFile(fileInputId) {
+        return new Promise(function(resolve) {
+          var input = document.getElementById(fileInputId);
+          if (!input || !input.files || !input.files[0]) {
+            return resolve(null);
+          }
+          var file = input.files[0];
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var img = new Image();
+            img.onload = function() {
+              var canvas = document.createElement('canvas');
+              var maxDim = 1024;
+              var w = img.width;
+              var h = img.height;
+              if (w > maxDim || h > maxDim) {
+                if (w > h) {
+                  h = Math.round((h * maxDim) / w);
+                  w = maxDim;
+                } else {
+                  w = Math.round((w * maxDim) / h);
+                  h = maxDim;
+                }
+              }
+              canvas.width = w;
+              canvas.height = h;
+              var ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, w, h);
+              var compressedDataUrl = canvas.toDataURL('image/jpeg', 0.78);
+              resolve({ base64: compressedDataUrl, name: file.name.replace(/\.[^/.]+$/, "") + ".jpg" });
+            };
+            img.onerror = function() {
+              resolve({ base64: e.target.result, name: file.name });
+            };
+            img.src = e.target.result;
+          };
+          reader.onerror = function() { resolve(null); };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function getCleanDriveUrl(url) {
+        if (!url) return { imgUrl: '', viewUrl: '' };
+        var fileId = '';
+        if (url.indexOf('id=') !== -1) {
+          var m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+          if (m) fileId = m[1];
+        } else if (url.indexOf('/file/d/') !== -1) {
+          var m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+          if (m) fileId = m[1];
+        } else if (url.indexOf('googleusercontent.com/d/') !== -1) {
+          var m = url.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+          if (m) fileId = m[1];
+        } else if (url.length > 20 && url.indexOf('/') === -1 && url.indexOf('.') === -1) {
+          fileId = url; // raw file id
+        }
+        if (fileId) {
+          return {
+            imgUrl: 'https://lh3.googleusercontent.com/d/' + fileId,
+            viewUrl: 'https://drive.google.com/file/d/' + fileId + '/view'
+          };
+        }
+        return { imgUrl: url, viewUrl: url };
+      }
+
+      function openReceiptModal(url) {
+        if (!url) return;
+        var links = getCleanDriveUrl(url);
+        document.getElementById('receiptPreviewImg').src = links.imgUrl;
+        document.getElementById('receiptOpenDriveLink').href = links.viewUrl;
+        showModalAtViewport('receiptPreviewModal');
+      }
+
+      function closeReceiptModal() {
+        document.getElementById('receiptPreviewModal').style.display = 'none';
+        document.getElementById('receiptPreviewImg').src = '';
+      }
+
+      function showStatusBanner(elementId, message, isSuccess) {
+        var el = document.getElementById(elementId);
+        if (!el) return;
+        el.innerText = message;
+        el.className = "status-banner " + (isSuccess !== false ? "success" : "error");
+        setTimeout(function() {
+          el.style.display = "none";
+          el.className = "status-banner";
+        }, 4000);
+      }
+
+      function getCurrentTrip() {
+        if (!selectedTripName || !appData.trips) return null;
+        return appData.trips.find(function(t) { return t.name === selectedTripName; }) || null;
+      }
+
+      function loadAppData(keepCurrentView, callback) {
+        google.script.run
+          .withFailureHandler(function(err) {
+            document.getElementById('loader').innerHTML = "<b style='color:red;'>❌ โหลดข้อมูลล้มเหลว: " + err.message + "</b>";
+          })
+          .withSuccessHandler(function(data) {
+            appData = data;
+            document.getElementById('loader').style.display = 'none';
+            renderTripList();
+
+            if (keepCurrentView && selectedTripName) {
+              refreshTripHeaderAndStats();
+            } else if (typeof callback === 'function') {
+              showView('viewAllTrips');
+            } else {
+              var activeTrips = (appData.trips || []).filter(function(t) { return t.status === "กำลังเที่ยว"; });
+              if (activeTrips.length > 0) {
+                selectTripByName(activeTrips[0].name);
+              } else {
+                showView('viewAllTrips');
+              }
+            }
+
+            if (typeof callback === 'function') {
+              callback();
+            }
+          })
+          .getAllAppData();
+      }
+
+      function renderTripList() {
+        var container = document.getElementById('tripListContainer');
+        container.innerHTML = "";
+        if (appData.trips.length === 0) {
+          container.innerHTML = "<p style='text-align:center; color:#777;'>ยังไม่มีทริป กดสร้างด้านล่างได้เลยครับ</p>";
+          return;
+        }
+
+        var sortedTrips = appData.trips.slice().sort(function(a, b) {
+          if (a.status === "กำลังเที่ยว" && b.status === "ปิดทริป") return -1;
+          if (a.status === "ปิดทริป" && b.status === "กำลังเที่ยว") return 1;
+          return 0;
+        });
+
+        sortedTrips.forEach(function(trip) {
+          var balance = appData.fundBalances[trip.name] || 0;
+          var isClosed = (trip.status === "ปิดทริป");
+          var btn = document.createElement("div");
+          btn.style.cssText = "background:white; border-radius:16px; padding:18px; margin-bottom:12px; cursor:pointer; border:1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.02);";
+          if(isClosed) btn.style.opacity = "0.75";
+          btn.onclick = function() { selectTripByName(trip.name); };
+          
+          btn.innerHTML = `
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px; align-items:center;">
+              <span style="font-weight:bold; font-size:16px; color:#333;">✈️ ${trip.name}</span>
+              <span style="font-size:11px; background:${isClosed?'#f5f5f5':'#ECFDF5'}; color:${isClosed?'#777':'#27ae60'}; padding:4px 8px; border-radius:8px; font-weight:500;">${isClosed?'🏁 ปิดทริปแล้ว':'🟢 กำลังเที่ยว'}</span>
+            </div>
+            <div style="font-size:12px; color:#777; margin-bottom:8px;">สมาชิก: ${trip.members.join(', ')}</div>
+            <div style="font-size:13px; color:#333;">👛 เงินกองกลางคงเหลือ: <b style="color:#27ae60;">฿${balance.toLocaleString('en-US', {minimumFractionDigits: 2})}</b></div>
+          `;
+          container.appendChild(btn);
+        });
+      }
+
+      function renderHomeDashboard() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+
+        // 1. Pinned Note
+        var noteText = (appData.tripNotes && appData.tripNotes[trip.name]) ? appData.tripNotes[trip.name].trim() : "";
+        var noteCard = document.getElementById('homePinnedNoteCard');
+        var noteContent = document.getElementById('homePinnedNoteContent');
+        if (noteCard && noteContent) {
+          if (noteText) {
+            noteContent.innerText = noteText;
+            noteCard.style.display = "block";
+          } else {
+            noteCard.style.display = "none";
+          }
+        }
+
+        // 2. Pending Todos
+        var todos = (appData.tripTodos && appData.tripTodos[trip.name]) ? appData.tripTodos[trip.name] : [];
+        var pendingTodos = todos.filter(function(t) { return !t.done; });
+        var todoListEl = document.getElementById('homePendingTodoList');
+        if (todoListEl) {
+          if (pendingTodos.length === 0) {
+            todoListEl.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin:6px 0;'>🎉 ทำครบทุกรายการแล้ว!</p>";
+          } else {
+            var todoHtml = "";
+            pendingTodos.slice(0, 4).forEach(function(t) {
+              todoHtml += `
+                <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:#FCFBF8; border-radius:10px; margin-bottom:6px;">
+                  <input type="checkbox" onchange="toggleTodoFromHome('${t.id}', this.checked)" style="width:16px; height:16px; margin:0; cursor:pointer; accent-color:#3E7B5D; flex-shrink:0;">
+                  <div style="min-width:0; flex:1;">
+                    <div style="font-size:13px; font-weight:500; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${t.text}</div>
+                    ${t.note ? '<div style="font-size:11px; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">'+t.note+'</div>' : ''}
+                  </div>
+                </div>
+              `;
+            });
+            if (pendingTodos.length > 4) {
+              todoHtml += `<div style="text-align:center; font-size:11px; color:#888; margin-top:4px;">+ อีก ${pendingTodos.length - 4} รายการ</div>`;
+            }
+            todoListEl.innerHTML = todoHtml;
+          }
+        }
+
+        // 3. Recent Expenses (Fetch latest 3 items)
+        var recentEl = document.getElementById('homeRecentExpensesList');
+        if (recentEl) {
+          google.script.run.withSuccessHandler(function(history) {
+            cachedFullHistory = history;
+            if (!history || history.length === 0) {
+              recentEl.innerHTML = "<p style='text-align:center; color:#888; font-size:12px; margin:8px 0;'>ยังไม่มีรายการใช้จ่าย</p>";
+              return;
+            }
+            var recentItems = history.slice(-3).reverse();
+            var rHtml = "";
+            recentItems.forEach(function(it) {
+              var isFund = (it.type === "เติมกองกลาง");
+              rHtml += `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 10px; background:#FCFBF8; border-radius:10px; margin-bottom:6px; gap:8px;">
+                  <div style="min-width:0; flex:1;">
+                    <div style="font-size:13px; font-weight:600; color:#222; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${it.description}</div>
+                    <div style="font-size:11px; color:#888;">${it.date} • ${isFund ? 'เติมโดย' : 'จ่ายโดย'} <b>${it.paidBy}</b></div>
+                  </div>
+                  <div style="font-size:13px; font-weight:bold; color:${isFund ? '#059669' : '#c0392b'}; white-space:nowrap;">
+                    ${isFund ? '+' : ''}฿${it.thbAmount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}
+                  </div>
+                </div>
+              `;
+            });
+            recentEl.innerHTML = rHtml;
+          }).getTripHistory(trip.name);
+        }
+      }
+
+      function toggleTodoFromHome(taskId, isDone) {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        google.script.run.withSuccessHandler(function(res) {
+          loadAppData(true);
+        }).updateTodoStatus({ tripName: trip.name, taskId: taskId, done: isDone });
+      }
+
+      function refreshTripHeaderAndStats() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        document.getElementById('currentTripTitle').innerText = trip.name;
+        var balance = appData.fundBalances[trip.name] || 0;
+        var balFormatted = "฿" + balance.toLocaleString('en-US', {minimumFractionDigits: 2});
+        document.getElementById('fundBalanceDisplay').innerText = balFormatted;
+        var compactFundEl = document.getElementById('compactFundDisplay');
+        if (compactFundEl) compactFundEl.innerText = balFormatted;
+
+        var isClosed = (trip.status === "ปิดทริป");
+        document.getElementById('statsTitleLabel').innerText = isClosed ? "ใช้จ่ายรวมทั้งสิ้น (รวมทุกช่วง)" : "ใช้จ่ายรวม (ระหว่างเที่ยว)";
+        document.getElementById('closedNoticeBox').style.display = isClosed ? "block" : "none";
+        
+        document.getElementById('editTripName').value = trip.name;
+        document.getElementById('editTripMembers').value = trip.members.join(', ');
+        document.getElementById('tripNoteText').value = (appData.tripNotes && appData.tripNotes[trip.name]) ? appData.tripNotes[trip.name] : "";
+
+        var badgeEl = document.getElementById('bnavTodoBadge');
+        if (badgeEl) {
+          var todos = (appData.tripTodos && appData.tripTodos[trip.name]) ? appData.tripTodos[trip.name] : [];
+          var pendingCount = todos.filter(function(t) { return !t.done; }).length;
+          if (pendingCount > 0) {
+            badgeEl.innerText = pendingCount;
+            badgeEl.style.display = 'flex';
+          } else {
+            badgeEl.style.display = 'none';
+          }
+        }
+
+        var curr = trip.defaultCurrency || 'THB';
+        var homeCalcCurrEl = document.getElementById('homeCalcCurr');
+        if (homeCalcCurrEl) homeCalcCurrEl.innerText = curr;
+        var calcCurrLbl = document.getElementById('calcCurrLabel');
+        if (calcCurrLbl) calcCurrLbl.innerText = curr;
+
+        if (typeof updateCalcDisplay === 'function') updateCalcDisplay();
+        renderHomeDashboard();
+        loadTripTotalStats(trip.name);
+        updateRateUI();
+        updatePPRateUI();
+        renderRateList();
+      }
+
+      function selectTripByName(tripName) {
+        selectedTripName = tripName;
+        var trip = getCurrentTrip();
+        if (!trip) return;
+
+        refreshTripHeaderAndStats();
+        setupTripUI();
+        showView('viewTripDetail');
+        switchTab('Home');
+      }
+
+      function loadTripTotalStats(tripName) {
+        google.script.run.withSuccessHandler(function(stats) {
+          var totalFmt = "฿" + stats.total.toLocaleString('en-US', {minimumFractionDigits: 2});
+          document.getElementById('totalExpenseDisplay').innerText = totalFmt;
+          var compactExpEl = document.getElementById('compactExpenseDisplay');
+          if (compactExpEl) compactExpEl.innerText = totalFmt;
+          document.getElementById('statMembers').innerText = stats.memberCount + " คน";
+          document.getElementById('statAverage').innerText = "เฉลี่ย ฿" + stats.average.toLocaleString('en-US', {minimumFractionDigits: 2}) + "/คน";
+          document.getElementById('statCount').innerText = stats.countItems + " รายการ";
+        }).getTripTotalStats(tripName);
+      }
+
+      function confirmCloseTrip() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        if (confirm("คุณต้องการปิดทริป '" + trip.name + "' ใช่หรือไม่? ระบบจะนำรายการ 'ก่อน/หลังออกเดินทาง' มาคำนวณรวมยอดสรุปทั้งหมดทันที")) {
+          google.script.run.withSuccessHandler(function(res) {
+            alert(res);
+            loadAppData(true);
+          }).closeTrip(trip.name);
+        }
+      }
+
+      function submitUpdateTrip(event) {
+        event.preventDefault();
+        var oldTrip = getCurrentTrip();
+        if (!oldTrip) return;
+        var btn = document.getElementById('btnEditTrip');
+        btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
+
+        var newName = document.getElementById('editTripName').value.trim();
+        var newMembers = document.getElementById('editTripMembers').value.trim();
+
+        google.script.run.withSuccessHandler(function(res) {
+          btn.innerText = "💾 บันทึกข้อมูลทริป"; btn.disabled = false;
+          var isOk = res.indexOf("✅") >= 0;
+          if (isOk) selectedTripName = newName;
+          showStatusBanner('statusEditTrip', res, isOk);
+          loadAppData(true, function() {
+            setupTripUI();
+          });
+        }).updateTripSettings({ oldTripName: oldTrip.name, newTripName: newName, newMembers: newMembers });
+      }
+
+      function showModalAtViewport(modalId) {
+        var modal = document.getElementById(modalId);
+        if (!modal) return;
+        modal.style.display = 'block';
+        var content = modal.querySelector('.modal-content');
+        if (content) {
+          content.style.marginTop = '0';
+          content.scrollTop = 0;
+        }
+      }
+
+      function openQuickActionModal() {
+        showModalAtViewport('quickActionModal');
+      }
+
+      function closeQuickActionModal() {
+        document.getElementById('quickActionModal').style.display = 'none';
+      }
+
+      function updateBottomNavActive(activeId) {
+        ['bnavHome', 'bnavExpense', 'bnavSummary', 'bnavMore'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.className = "bnav-item";
+        });
+        var activeEl = document.getElementById(activeId);
+        if (activeEl) activeEl.className = "bnav-item active";
+      }
+
+      function showView(viewId) {
+        ['viewAllTrips', 'viewNewTrip', 'viewTripDetail'].forEach(function(v) {
+          document.getElementById(v).style.display = 'none';
+        });
+        document.getElementById(viewId).style.display = (viewId === 'viewTripDetail') ? 'flex' : 'block';
+        var backBtn = document.getElementById('btnBackToCurrentTrip');
+        if (backBtn) {
+          backBtn.style.display = (viewId === 'viewAllTrips' && selectedTripName) ? 'inline-block' : 'none';
+        }
+        var bnav = document.getElementById('bottomNav');
+        if (bnav) {
+          if (viewId === 'viewTripDetail') {
+            bnav.style.display = 'grid';
+          } else {
+            bnav.style.display = 'none';
+          }
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function setupTripUI() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        
+        var paidByGroup = document.getElementById('paidByChipGroup');
+        paidByGroup.innerHTML = "";
+        var fundDiv = document.createElement('div');
+        fundDiv.className = 'chip-item full-width';
+        fundDiv.innerHTML = '<input type="radio" id="payer_fund" name="paidByChoice" value="กองกลาง" checked><label class="chip-label" for="payer_fund">👛 กองกลาง</label>';
+        paidByGroup.appendChild(fundDiv);
+
+        trip.members.forEach(function(m, idx) {
+          var div = document.createElement('div');
+          div.className = 'chip-item';
+          div.innerHTML = '<input type="radio" id="payer_'+idx+'" name="paidByChoice" value="'+m+'"><label class="chip-label" for="payer_'+idx+'">👤 '+m+'</label>';
+          paidByGroup.appendChild(div);
+        });
+
+        var ppPaidByGroup = document.getElementById('ppPaidByChipGroup');
+        ppPaidByGroup.innerHTML = "";
+        trip.members.forEach(function(m, idx) {
+          var div = document.createElement('div');
+          div.className = 'chip-item';
+          div.innerHTML = '<input type="radio" id="pp_payer_'+idx+'" name="ppPaidByChoice" value="'+m+'" '+(idx===0?'checked':'')+'>' +
+                            '<label class="chip-label" for="pp_payer_'+idx+'">👤 '+m+'</label>';
+          ppPaidByGroup.appendChild(div);
+        });
+
+        var splitContainer = document.getElementById('splitMembers');
+        var ppSplitContainer = document.getElementById('ppSplitMembers');
+        var fundContainer = document.getElementById('fundMembers');
+        splitContainer.innerHTML = ""; ppSplitContainer.innerHTML = ""; fundContainer.innerHTML = "";
+        
+        trip.members.forEach(function(m) {
+          splitContainer.innerHTML += '<label><input type="checkbox" name="splitWith" value="'+m+'" checked> ' + m + '</label>';
+          ppSplitContainer.innerHTML += '<label><input type="checkbox" name="ppSplitWith" value="'+m+'" checked> ' + m + '</label>';
+          fundContainer.innerHTML += '<label><input type="checkbox" name="fundBy" value="'+m+'" checked> ' + m + '</label>';
+        });
+
+        updateCurrencyDropdown();
+        renderRateList();
+      }
+
+      function updateCurrencyDropdown() {
+        var currSelect = document.getElementById('currency');
+        var ppCurrSelect = document.getElementById('ppCurrency');
+        var trip = getCurrentTrip();
+        var defaultCurr = trip ? trip.defaultCurrency : "THB";
+        
+        currSelect.innerHTML = ""; ppCurrSelect.innerHTML = "";
+        [defaultCurr, "THB"].filter(function(item, pos, self) { return self.indexOf(item) == pos; }).forEach(function(c) {
+          currSelect.add(new Option(c, c));
+          ppCurrSelect.add(new Option(c, c));
+        });
+        
+        currSelect.value = defaultCurr; ppCurrSelect.value = defaultCurr;
+        document.getElementById('newCurrency').value = defaultCurr;
+        updateRateUI(); updatePPRateUI();
+      }
+
+      function onDateChange() { updateRateUI(); }
+
+      function updateRateUI() {
+        var currEl = document.getElementById('currency');
+        if (!currEl || !currEl.value) return;
+        var selectedCurr = currEl.value;
+        var selectedDate = document.getElementById('date').value;
+        var rateInput = document.getElementById('rate');
+        var alertBox = document.getElementById('rateAlertBox');
+        var submitBtn = document.getElementById('btnExpense');
+
+        var found = appData.rates.find(function(r) { return r.currency === selectedCurr && r.date === selectedDate; });
+        if (found) {
+          rateInput.value = found.rate;
+          alertBox.style.display = "none";
+          if(submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; }
+        } else {
+          if (selectedCurr === 'THB') {
+            rateInput.value = 1;
+            alertBox.style.display = "none";
+            if(submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = "1"; }
+          } else {
+            rateInput.value = 0;
+            alertBox.style.display = (document.getElementById('mainFormWrapper').style.display !== 'none') ? "block" : "none";
+            if(submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = "0.5"; }
+          }
+        }
+        calculateTHB();
+      }
+
+      function updatePPRateUI() {
+        var currEl = document.getElementById('ppCurrency');
+        if (!currEl || !currEl.value) return;
+        var selectedCurr = currEl.value;
+        var selectedDate = document.getElementById('ppDate').value;
+        var rateInput = document.getElementById('ppRate');
+        var found = appData.rates.find(function(r) { return r.currency === selectedCurr && r.date === selectedDate; });
+        rateInput.value = found ? found.rate : (selectedCurr === 'THB' ? 1 : 0);
+        calculatePPTHB();
+      }
+
+      function calculateTHB() {
+        var amount = parseFloat(document.getElementById('amount').value) || 0;
+        var rate = parseFloat(document.getElementById('rate').value) || 0;
+        document.getElementById('thbDisplay').innerText = (amount * rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+
+      function calculatePPTHB() {
+        var amount = parseFloat(document.getElementById('ppAmount').value) || 0;
+        var rate = parseFloat(document.getElementById('ppRate').value) || 0;
+        document.getElementById('ppThbDisplay').innerText = (amount * rate).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+
+      function switchTab(type) {
+        ['homeDashboardWrapper', 'mainFormWrapper', 'prePostWrapper', 'summaryFormWrapper', 'todoFormWrapper', 'settingsFormWrapper', 'rateAlertBox'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.style.display = "none";
+        });
+
+        var titleEl = document.getElementById('activeSectionTitle');
+        var subEl = document.getElementById('activeSectionSub');
+        var compactBar = document.getElementById('compactFundBar');
+
+        // แสดงแถบสรุปย่อด้านบนเฉพาะหน้าที่ซ่อนการ์ดใหญ่ (ประหยัดพื้นที่)
+        if (compactBar) {
+          compactBar.style.display = (type === 'Home') ? "none" : "block";
+        }
+        var changeTripBtn = document.getElementById('btnChangeTrip');
+        if (changeTripBtn) {
+          changeTripBtn.style.display = (type === 'Home') ? "inline-block" : "none";
+        }
+
+        if (type === 'Home') {
+          updateBottomNavActive('bnavHome');
+          if (titleEl) titleEl.innerText = "🏠 ภาพรวมทริป";
+          if (subEl) subEl.innerText = "Dashboard";
+          document.getElementById('homeDashboardWrapper').style.display = "block";
+          renderHomeDashboard();
+        } else if (type === 'PrePost') {
+          updateBottomNavActive('bnavMore');
+          if (titleEl) titleEl.innerText = "🧳 จัดการทริป";
+          if (subEl) subEl.innerText = "ก่อน / หลังเดินทาง";
+          document.getElementById('prePostWrapper').style.display = "block";
+          switchPPSubTab('Record');
+        } else if (type === 'Summary') {
+          updateBottomNavActive('bnavSummary');
+          if (titleEl) titleEl.innerText = "📊 สรุปค่าใช้จ่าย";
+          if (subEl) subEl.innerText = "ยอดรวม / รายวัน / ประวัติ";
+          document.getElementById('summaryFormWrapper').style.display = "flex";
+          switchSubTab('Summary');
+        } else if (type === 'Todo') {
+          updateBottomNavActive('bnavMore');
+          if (titleEl) titleEl.innerText = "🧳 จัดการทริป";
+          if (subEl) subEl.innerText = "เช็คลิสต์ & โน้ต";
+          document.getElementById('todoFormWrapper').style.display = "block";
+          switchTodoSubTab('TodoList');
+        } else if (type === 'Settings') {
+          updateBottomNavActive('bnavMore');
+          if (titleEl) titleEl.innerText = "🧳 จัดการทริป";
+          if (subEl) subEl.innerText = "ตั้งค่าทริป";
+          document.getElementById('settingsFormWrapper').style.display = "block";
+          switchSettingsSubTab('EditTrip');
+        } else if (type === 'Fund') {
+          updateBottomNavActive('bnavExpense');
+          if (titleEl) titleEl.innerText = "👛 เติมเงินกองกลาง";
+          if (subEl) subEl.innerText = "เพิ่มเงินส่วนกลาง";
+          document.getElementById('mainFormWrapper').style.display = "block";
+          document.getElementById('entryType').value = 'Fund';
+          document.getElementById('categoryWrapper').style.display = "none";
+          document.getElementById('splitWrapper').style.display = "none";
+          document.getElementById('singlePayerWrapper').style.display = "none";
+          document.getElementById('fundWrapper').style.display = "block";
+          document.getElementById('description').value = "เติมเงินกองกลาง";
+          document.getElementById('btnExpense').innerText = "👛 บันทึกเติมเงินกองกลาง";
+          updateRateUI();
+        } else {
+          updateBottomNavActive('bnavExpense');
+          if (titleEl) titleEl.innerText = "💸 บันทึกค่าใช้จ่าย";
+          if (subEl) subEl.innerText = "ระหว่างเที่ยว";
+          document.getElementById('mainFormWrapper').style.display = "block";
+          document.getElementById('entryType').value = 'Expense';
+          document.getElementById('categoryWrapper').style.display = "block";
+          document.getElementById('splitWrapper').style.display = "block";
+          document.getElementById('singlePayerWrapper').style.display = "block";
+          document.getElementById('fundWrapper').style.display = "none";
+          document.getElementById('description').value = "";
+          document.getElementById('btnExpense').innerText = "บันทึกค่าใช้จ่าย";
+          updateRateUI();
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function switchSubTab(subType) {
+        ['subTabSummary', 'subTabDaily', 'subTabAll'].forEach(function(id) { document.getElementById(id).className = "sub-tab-btn"; });
+        ['viewSummaryPerson', 'viewSummaryDaily', 'viewSummaryAll'].forEach(function(id) { document.getElementById(id).style.display = "none"; });
+        
+        if (subType === 'Summary') {
+          document.getElementById('subTabSummary').className = "sub-tab-btn active";
+          document.getElementById('viewSummaryPerson').style.display = "block";
+          loadPersonSummaryData();
+        } else if (subType === 'Daily') {
+          document.getElementById('subTabDaily').className = "sub-tab-btn active";
+          document.getElementById('viewSummaryDaily').style.display = "flex";
+          loadDailyHistoryData();
+        } else if (subType === 'All') {
+          document.getElementById('subTabAll').className = "sub-tab-btn active";
+          document.getElementById('viewSummaryAll').style.display = "flex";
+          loadAllHistoryData();
+        }
+      }
+
+      function switchSettingsSubTab(subType) {
+        ['subTabEditTrip', 'subTabRates', 'subTabStatus'].forEach(function(id) { document.getElementById(id).className = "sub-tab-btn"; });
+        ['viewSettingsEditTrip', 'viewSettingsRates', 'viewSettingsStatus'].forEach(function(id) { document.getElementById(id).style.display = "none"; });
+        
+        document.getElementById('subTab' + subType).className = "sub-tab-btn active";
+        document.getElementById('viewSettings' + subType).style.display = "block";
+        if(subType === 'Rates') { renderRateList(); }
+      }
+
+      function renderRateList() {
+        var container = document.getElementById('rateListContainer');
+        container.innerHTML = "";
+        if (!appData.rates || appData.rates.length === 0) {
+          container.innerHTML = "<p style='text-align:center; color:#777; font-size:13px;'>ยังไม่มีประวัติเรทเงิน</p>";
+          return;
+        }
+        var html = `<table class="summary-table"><tr><th>วันที่</th><th>สกุลเงิน</th><th>เรท (บาท)</th></tr>`;
+        appData.rates.forEach(function(r) {
+          html += `<tr><td>${r.date}</td><td><b>${r.currency}</b></td><td>${r.rate}</td></tr>`;
+        });
+        container.innerHTML = html + "</table>";
+      }
+
+      function switchTodoSubTab(subType) {
+        ['subTabTodoList', 'subTabTripNote'].forEach(function(id) { document.getElementById(id).className = "sub-tab-btn"; });
+        ['viewTodoTodoList', 'viewTodoTripNote'].forEach(function(id) { document.getElementById(id).style.display = "none"; });
+        document.getElementById('subTab' + subType).className = "sub-tab-btn active";
+        document.getElementById('viewTodo' + subType).style.display = "block";
+        if(subType === 'TodoList') loadTodoListItems();
+      }
+
+      function escapeAttr(str) {
+        return String(str || "")
+          .replace(/&/g, "&amp;")
+          .replace(/'/g, "&#39;")
+          .replace(/"/g, "&quot;")
+          .replace(/\r?\n/g, "&#10;");
+      }
+
+      function loadTodoListItems() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var container = document.getElementById('todoListContainer');
+        container.innerHTML = "";
+        var todos = (appData.tripTodos && appData.tripTodos[trip.name]) ? appData.tripTodos[trip.name].slice() : [];
+        if (todos.length === 0) {
+          container.innerHTML = "<p style='text-align:center; color:#777; font-size:13px;'>ยังไม่มีรายการเช็คลิสต์</p>";
+          return;
+        }
+
+        todos.sort(function(a, b) {
+          if (a.done === b.done) return 0;
+          return a.done ? 1 : -1;
+        });
+
+        todos.forEach(function(t) {
+          var div = document.createElement("div");
+          div.className = "history-item";
+          div.style.cssText = "display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;" + (t.done ? "opacity:0.75;" : "");
+
+          div.innerHTML = `
+            <div style="display:flex; align-items:center; gap:10px; flex:1; padding-right:8px;">
+              <input type="checkbox" ${t.done?'checked':''} onchange="toggleTodoItem('${t.id}', this.checked)" style="width:18px; height:18px; cursor:pointer; margin:0; flex-shrink:0;">
+              <div style="word-break:break-word;">
+                <div style="font-size:14px; font-weight:600; text-decoration:${t.done?'line-through':''}; color:${t.done?'#888':'#222'};">${t.text}</div>
+                ${t.note ? '<div style="font-size:11px; color:#888; white-space:pre-line;">'+t.note+'</div>' : ''}
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">
+              <button type="button" data-id="${escapeAttr(t.id)}" data-text="${escapeAttr(t.text)}" data-note="${escapeAttr(t.note)}" onclick="openEditTodoModalFromBtn(this)" style="background:none; border:none; color:#555; cursor:pointer; font-size:14px; padding:4px;">✏️</button>
+              <button type="button" onclick="removeTodoItem('${t.id}')" style="background:none; border:none; color:#c0392b; cursor:pointer; font-size:14px; padding:4px;">🗑️</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      function openEditTodoModalFromBtn(btn) {
+        document.getElementById('editTodoId').value = btn.getAttribute('data-id') || "";
+        document.getElementById('editTodoTextInput').value = btn.getAttribute('data-text') || "";
+        document.getElementById('editTodoNoteInput').value = btn.getAttribute('data-note') || "";
+        showModalAtViewport('editTodoModal');
+      }
+
+      function closeEditTodoModal() {
+        document.getElementById('editTodoModal').style.display = 'none';
+      }
+
+      function submitEditTodo() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var id = document.getElementById('editTodoId').value;
+        var newText = document.getElementById('editTodoTextInput').value.trim();
+        var newNote = document.getElementById('editTodoNoteInput').value.trim();
+        if (!newText) return alert("กรุณากรอกชื่อรายการ");
+
+        var btn = document.getElementById('btnSaveEditTodo');
+        btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
+
+        google.script.run.withSuccessHandler(function(res) {
+          btn.innerText = "💾 บันทึก"; btn.disabled = false;
+          closeEditTodoModal();
+          showStatusBanner('statusTodo', res, res.indexOf("✅") >= 0);
+          loadAppData(true, function() { loadTodoListItems(); });
+        }).editTodoItem({ tripName: trip.name, taskId: id, taskText: newText, taskNote: newNote });
+      }
+
+      function submitNewTodo(event) {
+        event.preventDefault();
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var btn = document.getElementById('btnAddTodo');
+        btn.innerText = "กำลังเพิ่ม..."; btn.disabled = true;
+
+        var text = document.getElementById('newTodoText').value.trim();
+        var note = document.getElementById('newTodoNote').value.trim();
+        var taskId = 'task_' + new Date().getTime();
+
+        google.script.run.withSuccessHandler(function(res) {
+          btn.innerText = "➕ เพิ่มรายการ"; btn.disabled = false;
+          document.getElementById('newTodoText').value = "";
+          document.getElementById('newTodoNote').value = "";
+          showStatusBanner('statusTodo', res, res.indexOf("✅") >= 0);
+          loadAppData(true, function() { loadTodoListItems(); });
+        }).saveTodoItem({ tripName: trip.name, taskId: taskId, taskText: text, taskNote: note });
+      }
+
+      function toggleTodoItem(taskId, isDone) {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        google.script.run.withSuccessHandler(function(res) {
+          loadAppData(true, function() { loadTodoListItems(); });
+        }).updateTodoStatus({ tripName: trip.name, taskId: taskId, done: isDone });
+      }
+
+      function removeTodoItem(taskId) {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        if (!confirm("ต้องการลบรายการนี้ใช่หรือไม่?")) return;
+        google.script.run.withSuccessHandler(function(res) {
+          loadAppData(true, function() { loadTodoListItems(); });
+        }).deleteTodoItem({ tripName: trip.name, taskId: taskId });
+      }
+
+      function submitTripNote(event) {
+        event.preventDefault();
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var btn = document.getElementById('btnSaveNote');
+        btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
+
+        var content = document.getElementById('tripNoteText').value;
+
+        google.script.run.withSuccessHandler(function(res) {
+          btn.innerText = "💾 บันทึกโน้ต"; btn.disabled = false;
+          showStatusBanner('statusNote', res, res.indexOf("✅") >= 0);
+          loadAppData(true);
+        }).saveTripNote({ tripName: trip.name, noteContent: content });
+      }
+
+      function calculateSettlementTransfers(members, summary) {
+        var debtors = [];
+        var creditors = [];
+        members.forEach(function(m) {
+          var d = summary[m] || { paid: 0, share: 0 };
+          var diff = Math.round((d.paid - d.share) * 100) / 100;
+          if (diff < -0.01) {
+            debtors.push({ name: m, amount: Math.abs(diff) });
+          } else if (diff > 0.01) {
+            creditors.push({ name: m, amount: diff });
+          }
+        });
+
+        debtors.sort(function(a, b) { return b.amount - a.amount; });
+        creditors.sort(function(a, b) { return b.amount - a.amount; });
+
+        var transfers = [];
+        var i = 0, j = 0;
+        while (i < debtors.length && j < creditors.length) {
+          var payAmt = Math.min(debtors[i].amount, creditors[j].amount);
+          payAmt = Math.round(payAmt * 100) / 100;
+          if (payAmt > 0.01) {
+            transfers.push({ from: debtors[i].name, to: creditors[j].name, amount: payAmt });
+          }
+          debtors[i].amount = Math.round((debtors[i].amount - payAmt) * 100) / 100;
+          creditors[j].amount = Math.round((creditors[j].amount - payAmt) * 100) / 100;
+          if (debtors[i].amount <= 0.01) i++;
+          if (creditors[j].amount <= 0.01) j++;
+        }
+        return transfers;
+      }
+
+      function copySettlementSummary() {
+        if (!lastSettlementCopyText) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(lastSettlementCopyText).then(function() {
+            alert("📋 คัดลอกสรุปยอดโอนเงินเรียบร้อย! นำไปวางในไลน์กลุ่มได้เลยครับ");
+          });
+        } else {
+          var ta = document.createElement("textarea");
+          ta.value = lastSettlementCopyText;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand("copy");
+          document.body.removeChild(ta);
+          alert("📋 คัดลอกสรุปยอดโอนเงินเรียบร้อย! นำไปวางในไลน์กลุ่มได้เลยครับ");
+        }
+      }
+
+      
+      function toggleAccordion(headerEl) {
+        var content = headerEl.nextElementSibling;
+        var arrow = headerEl.querySelector('.accordion-arrow');
+        if (content.style.display === "none") {
+          content.style.display = "block";
+          if(arrow) arrow.style.transform = "rotate(180deg)";
+        } else {
+          content.style.display = "none";
+          if(arrow) arrow.style.transform = "rotate(0deg)";
+        }
+      }
+
+
+      function loadPersonSummaryData() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var container = document.getElementById('personSummaryContainer');
+        container.innerHTML = "<p style='text-align:center; color:#777; padding:20px;'>กำลังคำนวณยอด...</p>";
+
+        google.script.run.withSuccessHandler(function(res) {
+          cachedPersonData = res.summary;
+          cachedOverallSummary = res.overallSummary;
+          var html = "";
+
+          // 1. 👤 ยอดแต่ละคน (ตามสถานะทริป) ขึ้นก่อนเป็นอันดับแรก
+          html += `<div style="font-size: 15px; font-weight: bold; color: #555; margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="display:flex; align-items:center; gap:8px;"><span style="font-size:18px;">👤</span> ยอดแต่ละคน (แตะเพื่อดูรายละเอียด)</span>
+                   </div>`;
+
+          res.members.forEach(function(m) {
+            var data = res.summary[m] || { paid: 0, share: 0 };
+            var diff = data.paid - data.share;
+            var isPositive = diff >= 0;
+            var diffText = isPositive ? `ได้คืน ฿${diff.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}` : `ต้องจ่าย ฿${Math.abs(diff).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            var badgeClass = isPositive ? 'positive' : 'negative';
+            var initial = m.charAt(0).toUpperCase();
+
+            html += `
+              <div class="member-card" onclick="openPersonModal('${m}')">
+                <div class="mc-header">
+                  <div class="mc-avatar-name">
+                    <div class="mc-avatar">${initial}</div>
+                    <span>${m}</span>
+                  </div>
+                  <div class="mc-badge ${badgeClass}">${diffText}</div>
+                </div>
+                <div class="mc-stats">
+                  <div class="mc-stat-box">
+                    <div class="mc-stat-label">จ่ายไปแล้ว</div>
+                    <div class="mc-stat-val" style="color:#059669;">฿${data.paid.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                  </div>
+                  <div class="mc-stat-box">
+                    <div class="mc-stat-label">ส่วนที่ต้องรับผิดชอบ</div>
+                    <div class="mc-stat-val" style="color:#d35400;">฿${data.share.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+
+          // 2. การ์ด 📊 แยกตามหมวดหมู่ค่าใช้จ่าย (แสดงภาพรวมทันทีแบบ Real-time ไม่ต้องรอปิดทริป)
+          if (res.categories && res.categories.length > 0) {
+            var grandTotalFmt = (res.grandTotal || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            html += `
+              <div style="background: white; border-radius: 16px; margin-top: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #eee; overflow:hidden;">
+                <div onclick="toggleAccordion(this)" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #fafafa;">
+                  <div style="font-size: 15px; font-weight: bold; color: #333; display:flex; align-items:center; gap:8px;">
+                    <span>📊</span> แยกตามหมวดหมู่ค่าใช้จ่าย
+                  </div>
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:12px; color:#3E7B5D; font-weight:bold;">รวม ฿${grandTotalFmt}</span>
+                    <span class="accordion-arrow" style="font-size: 14px; transition: transform 0.2s; transform: rotate(180deg);">▼</span>
+                  </div>
+                </div>
+                <div class="accordion-content" style="display: block; padding: 18px 20px 8px 20px; border-top: 1px solid #eee;">`;
+            res.categories.forEach(function(c) {
+               var pct = Math.round(c.percent);
+               var hasAmt = c.total > 0;
+               html += `
+                 <div class="cat-row" style="opacity: ${hasAmt ? '1' : '0.45'};">
+                   <span style="color: #333;">${c.name}</span>
+                   <span><b>฿${c.total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b> <span style="color:#aaa; font-weight:normal; font-size:12px;">${pct}%</span></span>
+                 </div>
+                 <div class="cat-bar-bg" style="opacity: ${hasAmt ? '1' : '0.45'};"><div class="cat-bar-fill" style="width: ${pct}%;"></div></div>
+               `;
+            });
+            html += `</div>
+              </div>`;
+          }
+
+          // 3. Accordion สำหรับ 💸 สรุปการโอนเงินเคลียร์ยอด & ภาพรวม
+          var transfers = calculateSettlementTransfers(res.members, res.summary);
+          var copyLines = ["✈️ สรุปยอดโอนเงินเคลียร์ทริป: " + trip.name];
+          
+          html += `
+            <div style="background: white; border-radius: 16px; margin-top: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.02); border: 1px solid #ECFDF5; overflow:hidden;">
+              <div onclick="toggleAccordion(this)" style="padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #EEF2FF;">
+                <div style="font-size: 15px; font-weight: bold; color: #059669; display:flex; align-items:center; gap:8px;">
+                  <span>💸</span> สรุปการโอนเงินเคลียร์ยอด & ภาพรวม
+                </div>
+                <span class="accordion-arrow" style="font-size: 14px; transition: transform 0.2s; transform: rotate(0deg);">▼</span>
+              </div>
+              <div class="accordion-content" style="display: none; padding: 20px; border-top: 1px solid #ECFDF5;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px;">
+                  <div style="font-size: 14px; font-weight: bold; color: #059669;">รายการโอนเงิน</div>
+                  <button type="button" onclick="copySettlementSummary()" style="background:#ECFDF5; color:#059669; border:1px solid #a9dfbf; border-radius:8px; padding:4px 10px; font-size:11px; font-weight:bold; cursor:pointer; font-family:'Prompt',sans-serif;">📋 คัดลอกส่งไลน์</button>
+                </div>`;
+          
+          if (transfers.length === 0) {
+            html += `<div style="text-align:center; color:#777; font-size:13px; padding:8px 0; margin-bottom:15px;">🎉 ยอดเงินลงตัวครบทุกคนแล้ว ไม่มียอดค้างโอน</div>`;
+            copyLines.push("🎉 ยอดเงินลงตัวครบทุกคนแล้ว!");
+          } else {
+            transfers.forEach(function(tr) {
+              var amtStr = tr.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+              html += `<div class="settle-row">
+                        <div><b>${tr.from}</b> <span style="color:#888; margin:0 4px;">➔ โอนให้</span> <b>${tr.to}</b></div>
+                        <div style="font-weight:bold; color:#c0392b; font-size:15px;">฿${amtStr}</div>
+                       </div>`;
+              copyLines.push("• " + tr.from + " โอนให้ " + tr.to + " : " + amtStr + " บาท");
+            });
+            html += `<div style="margin-bottom:15px;"></div>`;
+          }
+          var fundBal = appData.fundBalances[trip.name] || 0;
+          if (Math.abs(fundBal) > 0.01) {
+            copyLines.push("👛 เงินกองกลางคงเหลือ: " + fundBal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + " บาท");
+          }
+          lastSettlementCopyText = copyLines.join("\n");
+
+          html += `<div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 10px; margin-top:15px;">📌 สรุปภาพรวมทั้งทริป (จ่ายจริงทุกรายการ)</div>
+                   <div style="overflow-x: auto;">
+                     <table class="summary-table" style="margin-bottom:0;">
+                       <tr><th>สมาชิก</th><th>จ่ายจริง</th><th>ส่วนที่ต้องหาร</th></tr>`;
+          res.members.forEach(function(m) {
+            var ov = res.overallSummary[m] || { totalPaid: 0, totalShare: 0 };
+            html += `<tr><td><b>${m}</b></td><td style="color:#059669; font-weight:bold;">฿${ov.totalPaid.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td><td style="color:#d35400;">฿${ov.totalShare.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+          });
+          html += `   </table>
+                   </div>
+                  </div>
+            </div>`;
+
+          container.innerHTML = html;
+        }).getPerPersonSummary(trip.name);
+      }
+
+
+function openPersonModal(memberName) {
+        if (!cachedPersonData || !cachedPersonData[memberName]) return;
+        
+        var items = cachedPersonData[memberName].items;
+        document.getElementById('modalPersonTitle').innerHTML = `
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div style="width:36px; height:36px; background:#3E7B5D; color:white; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:18px; font-weight:bold;">${memberName.charAt(0).toUpperCase()}</div>
+            <div>
+              <div style="font-size:18px; font-weight:bold; color:#111;">${memberName}</div>
+              <div style="font-size:12px; color:#888;">ทั้งหมด ${items.length} รายการ</div>
+            </div>
+          </div>
+        `;
+        
+        var body = document.getElementById('modalPersonBody');
+        
+        if (items.length === 0) {
+          body.innerHTML = "<p style='text-align:center; color:#777; padding:20px;'>ไม่มีรายการ</p>";
+        } else {
+          var listHtml = "";
+          items.forEach(function(it) {
+            var isFundTopup = (it.entryType === "เติมกองกลาง");
+            var displayMainAmt = isFundTopup ? it.totalBillAmount : it.shareAmount;
+            var mainAmtLabel = isFundTopup ? "เติมเงินเข้ากองกลาง" : (it.isSharer ? "ส่วนที่ต้องหาร" : "ไม่ได้ร่วมหารบิลนี้");
+
+            var payerBadge = "";
+            if (isFundTopup) {
+              payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">เติมกองกลาง</span>`;
+            } else if (it.isPayer) {
+              payerBadge = `<span style="background:#ECFDF5; color:#059669; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:600;">ออกเงินไปก่อน</span>`;
+            }
+
+            var receiptBtn = it.receiptUrl ? `<button type="button" class="receipt-badge-btn" onclick="openReceiptModal('${it.receiptUrl}')">🧾 ดูสลิป</button>` : "";
+
+            var billDetailText = "";
+            if (isFundTopup) {
+              billDetailText = `${it.date} • สกุลเงิน ${it.currency}`;
+            } else {
+              var foreignPart = (it.currency !== "THB" && it.foreignAmount) ? ` (${it.foreignAmount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})} ${it.currency})` : "";
+              billDetailText = `${it.date} • ยอดรวมบิล <b>฿${it.totalBillAmount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</b>${foreignPart} • จ่ายโดย <b>${it.paidBy}</b>`;
+            }
+
+            var clearControlHtml = "";
+            if (it.period !== 'ระหว่างเที่ยว' && !isFundTopup) {
+              var isChecked = (it.clearStatus === 'จ่ายเงินแล้ว');
+              clearControlHtml = `<label style="cursor:pointer; display:inline-flex; align-items:center; gap:5px; background:${isChecked?'#ECFDF5':'#fdedec'}; padding:4px 10px; border-radius:8px; border:1px solid ${isChecked?'#a9dfbf':'#fadbd8'};">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleStatusGlobally(${it.rowIndex}, '${it.period}', '${it.date}', '${escapeAttr(it.description)}', ${it.totalBillAmount}, this.checked, 'Person', '${memberName}')" style="width:14px; height:14px; margin:0; accent-color:#3E7B5D;">
+                <span style="color:${isChecked?'#059669':'#c0392b'}; font-weight:bold; font-size:11px;">${isChecked?'✅ จ่ายแล้ว':'⏳ ค้างจ่าย'}</span>
+              </label>`;
+            }
+
+            listHtml += `
+              <div style="background: #fff; border: 1px solid #EAE6DF; border-radius: 14px; padding: 14px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; gap:8px;">
+                  <div style="font-size:14px; font-weight:600; color:#222; word-break:break-word; flex:1; line-height:1.4;">${it.description}</div>
+                  <div style="font-size:16px; font-weight:bold; color:${isFundTopup ? '#059669' : '#111'}; white-space:nowrap;">฿${displayMainAmt.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+                </div>
+                
+                <div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:10px;">
+                  ${payerBadge}
+                  ${receiptBtn}
+                  <span style="font-size:11px; color:#888; margin-left:auto;">${mainAmtLabel}</span>
+                </div>
+
+                <div style="font-size:12px; color:#666; border-top:1px solid #f0ece6; padding-top:8px; margin-top:6px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                  <div style="flex:1; min-width:0; word-break:break-word;">${billDetailText}</div>
+                  <div>${clearControlHtml}</div>
+                </div>
+              </div>
+            `;
+          });
+          body.innerHTML = listHtml;
+        }
+        showModalAtViewport('personModal');
+      }
+
+      function closePersonModal() { document.getElementById('personModal').style.display = "none"; }
+
+      function switchPPSubTab(subType) {
+        ['subTabPPRecord', 'subTabPPSummary'].forEach(function(id) { document.getElementById(id).className = "sub-tab-btn"; });
+        ['viewPPRecord', 'viewPPSummary'].forEach(function(id) { document.getElementById(id).style.display = "none"; });
+        document.getElementById('subTabPP' + subType).className = "sub-tab-btn active";
+        document.getElementById('viewPP' + subType).style.display = "block";
+        if(subType === 'Summary') { loadPrePostSummaryOnly(); loadPrePostItems(); }
+      }
+
+      function loadPrePostSummaryOnly() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var container = document.getElementById('prePostSummaryContainer');
+        container.innerHTML = "<p style='text-align:center; color:#777;'>กำลังคำนวณยอด...</p>";
+        google.script.run.withSuccessHandler(function(res) {
+          var html = `<table class="summary-table"><tr><th>สมาชิก</th><th>จ่ายไปแล้ว</th><th>ส่วนที่ต้องหาร</th><th>คงเหลือ</th></tr>`;
+          res.members.forEach(function(m) {
+            var d = res.summary[m] || { paid:0, share:0 };
+            var diff = d.paid - d.share;
+            var dt = diff >= 0 ? `<span style="color:#27ae60;font-weight:bold;">+฿${diff.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</span>` : `<span style="color:#c0392b;font-weight:bold;">-฿${Math.abs(diff).toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</span>`;
+            html += `<tr><td><b>${m}</b></td><td>฿${d.paid.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td>฿${d.share.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}</td><td>${dt}</td></tr>`;
+          });
+          container.innerHTML = html + `</table>`;
+        }).getPrePostSummary(trip.name);
+      }
+
+      function buildHistoryCardHtml(item, sourceView) {
+        var isCleared = (item.clearStatus === 'จ่ายเงินแล้ว');
+        var receiptBtn = item.receiptUrl ? `<button type="button" class="receipt-badge-btn" onclick="openReceiptModal('${item.receiptUrl}')">🧾 ดูสลิป</button>` : "";
+        
+        var clearToggleHtml = "";
+        if (item.period !== 'ระหว่างเที่ยว' && item.type === 'ค่าใช้จ่าย') {
+          var pillClass = isCleared ? 'cleared' : 'pending';
+          var pillText = isCleared ? '✅ จ่ายแล้ว' : '⏳ ค้างจ่าย';
+          clearToggleHtml = `
+            <label class="status-pill ${pillClass}">
+              <input type="checkbox" ${isCleared ? 'checked' : ''} onchange="toggleStatusGlobally(${item.rowIndex}, '${item.period}','${item.date}','${escapeAttr(item.description)}',${item.thbAmount},this.checked,'${sourceView}')" style="width:14px; height:14px; margin:0; cursor:pointer; accent-color:#3E7B5D;">
+              <span>${pillText}</span>
+            </label>`;
+        }
+
+        var dateLabel = (sourceView === 'Daily') ? item.type : (item.date + ' • ' + item.type);
+        var splitInfo = (item.type === 'ค่าใช้จ่าย') ? ` • หาร: ${item.splitWith}` : '';
+        var amtColor = (item.type === 'เติมกองกลาง') ? '#059669' : '#222';
+
+        return `
+          <div class="history-card-top">
+            <div>
+              <div style="font-size: 11px; color: #888; margin-bottom: 2px;">${dateLabel}</div>
+              <div class="history-card-title">${item.description}</div>
+            </div>
+            <div class="history-card-amount" style="color: ${amtColor};">
+              ${item.type === 'เติมกองกลาง' ? '+' : ''}฿${item.thbAmount.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})}
+            </div>
+          </div>
+          
+          <div class="history-card-meta">
+            <span>👤 จ่ายโดย: <b>${item.paidBy}</b></span>
+            ${splitInfo ? `<span>👥 หาร: ${item.splitWith}</span>` : ''}
+          </div>
+
+          <div class="history-card-divider"></div>
+
+          <div class="history-card-footer">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              ${receiptBtn}
+              ${clearToggleHtml}
+            </div>
+            <div class="history-card-actions">
+              <button type="button" class="clean-action-btn" onclick="openEditExpenseModal(${item.rowIndex}, '${sourceView}')">✏️ แก้ไข</button>
+              <button type="button" class="clean-action-btn del" data-row="${item.rowIndex}" data-desc="${escapeAttr(item.description)}" data-view="${sourceView}" onclick="confirmDeleteExpenseFromBtn(this)">🗑️ ลบ</button>
+            </div>
+          </div>
+        `;
+      }
+
+      function loadPrePostItems() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var per = document.querySelector('input[name="prePostHistPeriod"]:checked').value;
+        var container = document.getElementById('prePostListContainer');
+        container.innerHTML = "<p style='text-align:center; color:#777;'>กำลังโหลด...</p>";
+        google.script.run.withSuccessHandler(function(history) {
+          cachedFullHistory = history;
+          container.innerHTML = "";
+          var filtered = history.filter(function(it) { return it.period === per; });
+          if (filtered.length === 0) return container.innerHTML = "<p style='text-align:center; color:#777;'>ยังไม่มีรายการ</p>";
+          filtered.reverse().forEach(function(item) {
+            var div = document.createElement("div"); div.className = "history-item";
+            div.innerHTML = buildHistoryCardHtml(item, 'PrePost');
+            container.appendChild(div);
+          });
+        }).getTripHistory(trip.name);
+      }
+
+      function toggleStatusGlobally(rowIndex, period, date, description, amount, isChecked, viewName, optMemberName) {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var statusStr = isChecked ? 'จ่ายเงินแล้ว' : 'ยังไม่จ่ายเงิน';
+        
+        if(viewName === 'Person') document.getElementById('modalPersonBody').innerHTML = "<p style='text-align:center; padding:20px;'>กำลังอัปเดต...</p>";
+
+        google.script.run.withSuccessHandler(function(res) {
+          if (viewName === 'Person') {
+            google.script.run.withSuccessHandler(function(summaryRes) {
+               cachedPersonData = summaryRes.summary;
+               if (optMemberName) openPersonModal(optMemberName);
+               loadPersonSummaryData(); 
+            }).getPerPersonSummary(trip.name);
+          } else if (viewName === 'PrePost') {
+            loadPrePostItems(); loadPrePostSummaryOnly();
+          } else if (viewName === 'Daily') {
+            loadDailyHistoryData();
+          } else if (viewName === 'All') {
+            loadAllHistoryData();
+          }
+        }).updatePrePostClearStatus({tripName: trip.name, rowIndex: rowIndex, period: period, date: date, description: description, amount: amount, clearStatus: statusStr});
+      }
+
+      function loadDailyHistoryData() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var container = document.getElementById('dailyHistoryContainer');
+        container.innerHTML = "<p style='text-align:center; color:#777;'>กำลังโหลด...</p>";
+        google.script.run.withSuccessHandler(function(history) {
+          cachedFullHistory = history;
+          renderDailyHistory();
+        }).getTripHistory(trip.name);
+      }
+
+      function renderDailyHistory() {
+        var targetDate = document.getElementById('filterDate').value;
+        var container = document.getElementById('dailyHistoryContainer');
+        container.innerHTML = "";
+        var filtered = cachedFullHistory.filter(function(item) { return item.date === targetDate; });
+
+        if (filtered.length === 0) return container.innerHTML = `<p style='text-align:center; color:#777; margin-top:15px;'>ไม่มีรายการวันที่ ${targetDate}</p>`;
+
+        var dayTotal = 0; filtered.forEach(function(it) { if(it.type === 'ค่าใช้จ่าย') dayTotal += it.thbAmount; });
+        var groupDiv = document.createElement("div");
+        groupDiv.innerHTML = `<div style="background: #333; color: white; padding: 8px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 10px; display: flex; justify-content: space-between;"><span>📅 ${targetDate}</span><span>รวมจ่าย: ${dayTotal.toLocaleString('en-US',{minimumFractionDigits:2, maximumFractionDigits:2})} ฿</span></div>`;
+        
+        filtered.forEach(function(item) {
+          var div = document.createElement("div"); div.className = "history-item";
+          div.innerHTML = buildHistoryCardHtml(item, 'Daily');
+          groupDiv.appendChild(div);
+        });
+        container.appendChild(groupDiv);
+      }
+
+      function loadAllHistoryData() {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var container = document.getElementById('historyListContainer');
+        container.innerHTML = "<p style='text-align:center; color:#777;'>กำลังโหลด...</p>";
+        google.script.run.withSuccessHandler(function(history) {
+          cachedFullHistory = history;
+          container.innerHTML = "";
+          if (history.length === 0) return container.innerHTML = "<p style='text-align:center; color:#777;'>ยังไม่มีประวัติ</p>";
+          history.slice().reverse().forEach(function(item) {
+            var div = document.createElement("div"); div.className = "history-item";
+            div.innerHTML = buildHistoryCardHtml(item, 'All');
+            container.appendChild(div);
+          });
+        }).getTripHistory(trip.name);
+      }
+
+      function openEditExpenseModal(rowIndex, sourceView) {
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        var item = cachedFullHistory.find(function(it) { return it.rowIndex === rowIndex; });
+        if (!item) return alert("ไม่พบข้อมูลรายการ");
+
+        document.getElementById('editExpRowIndex').value = item.rowIndex;
+        document.getElementById('editExpEntryType').value = item.type;
+        document.getElementById('editExpPeriod').value = item.period;
+        document.getElementById('editExpSourceView').value = sourceView;
+
+        document.getElementById('editExpDate').value = item.date;
+        document.getElementById('editExpDesc').value = item.description;
+
+        var isFund = (item.type === "เติมกองกลาง");
+        document.getElementById('editExpCatWrapper').style.display = isFund ? "none" : "block";
+        document.getElementById('editExpSplitWrapper').style.display = isFund ? "none" : "block";
+        document.getElementById('editExpPayerLabel').innerText = isFund ? "ผู้เติมเงินเข้ากองกลาง" : "ผู้จ่ายเงิน";
+        
+        if (!isFund) {
+          var catSel = document.getElementById('editExpCategory');
+          var hasOption = Array.from(catSel.options).some(function(opt) { return opt.value === item.category; });
+          if (!hasOption && item.category) {
+            catSel.add(new Option(item.category, item.category));
+          }
+          catSel.value = item.category || "🍜 อาหาร";
+        }
+
+        var currSel = document.getElementById('editExpCurrency');
+        currSel.innerHTML = "";
+        [trip.defaultCurrency, "THB", item.currency].filter(function(v, i, a) { return v && a.indexOf(v) === i; }).forEach(function(c) {
+          currSel.add(new Option(c, c));
+        });
+        currSel.value = item.currency || "THB";
+
+        document.getElementById('editExpRate').value = item.rate || 1;
+        var foreignAmt = item.rate > 0 ? (item.thbAmount / item.rate) : item.thbAmount;
+        document.getElementById('editExpAmount').value = Math.round(foreignAmt * 100) / 100;
+        calculateEditExpTHB();
+
+        var payerSel = document.getElementById('editExpPaidBy');
+        payerSel.innerHTML = "";
+        if (!isFund) {
+          payerSel.add(new Option("👛 กองกลาง", "กองกลาง"));
+        }
+        trip.members.forEach(function(m) {
+          payerSel.add(new Option("👤 " + m, m));
+        });
+        payerSel.value = item.paidBy;
+
+        var splitDiv = document.getElementById('editExpSplitMembers');
+        splitDiv.innerHTML = "";
+        var currentSplits = (item.splitWith || "").split(',').map(function(s) { return s.trim(); });
+        trip.members.forEach(function(m) {
+          var chk = currentSplits.indexOf(m) !== -1 ? "checked" : "";
+          splitDiv.innerHTML += `<label><input type="checkbox" name="editExpSplit" value="${m}" ${chk}> ${m}</label>`;
+        });
+
+        var isPrePost = (item.period !== "ระหว่างเที่ยว" && !isFund);
+        document.getElementById('editExpClearWrapper').style.display = isPrePost ? "block" : "none";
+        if (isPrePost) {
+          document.getElementById('editExpClearStatus').value = (item.clearStatus === "จ่ายเงินแล้ว") ? "จ่ายเงินแล้ว" : "ยังไม่จ่ายเงิน";
+        }
+
+        var currReceiptDiv = document.getElementById('editExpCurrentReceipt');
+        if (item.receiptUrl) {
+          currReceiptDiv.innerHTML = `มีรูปแนบอยู่แล้ว: <a href="javascript:void(0)" onclick="openReceiptModal('${item.receiptUrl}')" style="color:#2874a6; font-weight:bold;">🧾 กดดูรูปเดิม</a>`;
+        } else {
+          currReceiptDiv.innerHTML = `<span style="color:#999;">ยังไม่มีรูปใบเสร็จแนบ</span>`;
+        }
+        document.getElementById('editExpReceiptFile').value = "";
+
+        showModalAtViewport('editExpenseModal');
+      }
+
+      function closeEditExpenseModal() {
+        document.getElementById('editExpenseModal').style.display = "none";
+      }
+
+      function calculateEditExpTHB() {
+        var amt = parseFloat(document.getElementById('editExpAmount').value) || 0;
+        var rt = parseFloat(document.getElementById('editExpRate').value) || 0;
+        document.getElementById('editExpThbDisplay').innerText = (amt * rt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+
+      function submitEditExpense(event) {
+        event.preventDefault();
+        var trip = getCurrentTrip();
+        if (!trip) return;
+
+        var entryType = document.getElementById('editExpEntryType').value;
+        var checkedSplits = [];
+        if (entryType !== "เติมกองกลาง") {
+          document.querySelectorAll('input[name="editExpSplit"]:checked').forEach(function(cb) { checkedSplits.push(cb.value); });
+          if (checkedSplits.length === 0) return alert("กรุณาเลือกคนร่วมหารอย่างน้อย 1 คน");
+        }
+
+        var btn = document.getElementById('btnSaveEditExp');
+        btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
+
+        compressImageFile('editExpReceiptFile').then(function(imgObj) {
+          var payload = {
+            tripName: trip.name,
+            rowIndex: parseInt(document.getElementById('editExpRowIndex').value, 10),
+            date: document.getElementById('editExpDate').value,
+            description: document.getElementById('editExpDesc').value.trim(),
+            category: entryType === "เติมกองกลาง" ? "กองกลาง" : document.getElementById('editExpCategory').value,
+            currency: document.getElementById('editExpCurrency').value,
+            rate: document.getElementById('editExpRate').value,
+            amount: document.getElementById('editExpAmount').value,
+            paidBy: document.getElementById('editExpPaidBy').value,
+            splitWith: checkedSplits,
+            clearStatus: document.getElementById('editExpClearWrapper').style.display !== "none" ? document.getElementById('editExpClearStatus').value : null,
+            receiptBase64: imgObj ? imgObj.base64 : null,
+            receiptName: imgObj ? imgObj.name : null
+          };
+
+          var sourceView = document.getElementById('editExpSourceView').value;
+
+          google.script.run.withSuccessHandler(function(res) {
+            btn.innerText = "💾 บันทึกการแก้ไข"; btn.disabled = false;
+            closeEditExpenseModal();
+            alert(res);
+            loadAppData(true, function() {
+              if (sourceView === 'All') loadAllHistoryData();
+              else if (sourceView === 'Daily') loadDailyHistoryData();
+              else if (sourceView === 'PrePost') { loadPrePostItems(); loadPrePostSummaryOnly(); }
+            });
+          }).updateExpenseItem(payload);
+        });
+      }
+
+      function confirmDeleteExpenseFromBtn(btn) {
+        var rowIndex = parseInt(btn.getAttribute('data-row'), 10);
+        var desc = btn.getAttribute('data-desc') || "";
+        var sourceView = btn.getAttribute('data-view') || "All";
+        var trip = getCurrentTrip();
+        if (!trip) return;
+        if (!confirm("ต้องการลบรายการ '" + desc + "' ใช่หรือไม่? (ลบแล้วไม่สามารถกู้คืนได้)")) return;
+
+        google.script.run.withSuccessHandler(function(res) {
+          alert(res);
+          loadAppData(true, function() {
+            if (sourceView === 'All') loadAllHistoryData();
+            else if (sourceView === 'Daily') loadDailyHistoryData();
+            else if (sourceView === 'PrePost') { loadPrePostItems(); loadPrePostSummaryOnly(); }
+          });
+        }).deleteExpenseItem({ tripName: trip.name, rowIndex: rowIndex });
+      }
+
+      function submitExpense(event) {
+        event.preventDefault(); 
+        var trip = getCurrentTrip();
+        if (!trip) return;
+
+        var entryType = document.getElementById('entryType').value;
+        var checkedSplits = [], checkedFunds = [];
+        
+        if (entryType === 'Expense') {
+           document.querySelectorAll('input[name="splitWith"]:checked').forEach(function(cb) { checkedSplits.push(cb.value); });
+           if(!checkedSplits.length) { alert("เลือกคนหาร"); return; }
+        } else {
+           document.querySelectorAll('input[name="fundBy"]:checked').forEach(function(cb) { checkedFunds.push(cb.value); });
+           if(!checkedFunds.length) { alert("เลือกคนเติมเงิน"); return; }
+        }
+
+        var btn = document.getElementById('btnExpense'); 
+        btn.innerText = "กำลังบันทึก..."; 
+        btn.disabled = true;
+
+        compressImageFile('mainReceiptFile').then(function(imgObj) {
+          var data = {
+            trip: trip.name, entryType: entryType, period: 'ระหว่างเที่ยว',
+            date: document.getElementById('date').value, description: document.getElementById('description').value,
+            category: entryType==='Fund'?'กองกลาง':document.querySelector('input[name="category"]:checked').value,
+            currency: document.getElementById('currency').value, rate: document.getElementById('rate').value,
+            amount: document.getElementById('amount').value,
+            paidBy: entryType==='Expense'?document.querySelector('input[name="paidByChoice"]:checked').value:null,
+            paidByList: entryType==='Fund'?checkedFunds:null, splitWith: checkedSplits,
+            receiptBase64: imgObj ? imgObj.base64 : null,
+            receiptName: imgObj ? imgObj.name : null
+          };
+
+          google.script.run.withSuccessHandler(function(res) {
+              btn.innerText = "บันทึกค่าใช้จ่าย"; 
+              btn.disabled = false;
+              document.getElementById('description').value = entryType==='Fund'?'เติมเงินกองกลาง':''; 
+              document.getElementById('amount').value = ''; 
+              document.getElementById('mainReceiptFile').value = '';
+              calculateTHB();
+              showStatusBanner('statusMain', res, res.indexOf("✅") >= 0);
+              loadAppData(true);
+          }).saveExpense(data);
+        });
+      }
+
+      function submitPrePostExpense(event) {
+        event.preventDefault(); 
+        var trip = getCurrentTrip();
+        if (!trip) return;
+
+        var checkedSplits = []; 
+        document.querySelectorAll('input[name="ppSplitWith"]:checked').forEach(function(cb) { checkedSplits.push(cb.value); });
+        if(!checkedSplits.length) { alert("เลือกคนหาร"); return; }
+
+        var btn = document.getElementById('btnPPExpense'); 
+        btn.innerText = "กำลังบันทึก..."; 
+        btn.disabled = true;
+        
+        compressImageFile('ppReceiptFile').then(function(imgObj) {
+          var data = {
+            trip: trip.name, entryType: 'Expense',
+            period: document.querySelector('input[name="prePostPeriod"]:checked').value,
+            date: document.getElementById('ppDate').value, description: document.getElementById('ppDescription').value,
+            category: '🧳 เตรียมตัว/เบ็ดเตล็ด', currency: document.getElementById('ppCurrency').value,
+            rate: document.getElementById('ppRate').value, amount: document.getElementById('ppAmount').value,
+            paidBy: document.querySelector('input[name="ppPaidByChoice"]:checked').value,
+            splitWith: checkedSplits, clearStatus: document.querySelector('input[name="ppClearStatus"]:checked').value,
+            receiptBase64: imgObj ? imgObj.base64 : null,
+            receiptName: imgObj ? imgObj.name : null
+          };
+
+          google.script.run.withSuccessHandler(function(res) {
+              btn.innerText = "บันทึกค่าใช้จ่าย"; 
+              btn.disabled = false;
+              document.getElementById('ppDescription').value = ''; 
+              document.getElementById('ppAmount').value = ''; 
+              document.getElementById('ppReceiptFile').value = '';
+              calculatePPTHB();
+              showStatusBanner('statusPP', res, res.indexOf("✅") >= 0);
+              loadAppData(true);
+          }).saveExpense(data);
+        });
+      }
+
+      function submitNewTrip(event) {
+        event.preventDefault();
+        var btn = document.getElementById('btnTrip');
+        btn.innerText = "กำลังสร้างทริป..."; btn.disabled = true;
+
+        var tripName = document.getElementById('newTripName').value.trim();
+        var data = { tripName: tripName, members: document.getElementById('newTripMembers').value, defaultCurrency: document.getElementById('newDefaultCurrency').value, defaultRate: document.getElementById('newDefaultRate').value };
+        
+        google.script.run.withSuccessHandler(function(res) {
+          btn.innerText = "✨ สร้างทริป"; btn.disabled = false;
+          document.getElementById('newTripName').value = ""; 
+          document.getElementById('newTripMembers').value = "";
+          loadAppData(false, function() {
+            selectTripByName(tripName);
+            showStatusBanner('statusMain', res, res.indexOf("✅") >= 0);
+          });
+        }).saveNewTrip(data);
+      }
+
+      function submitNewRate(event) {
+        event.preventDefault();
+        var btn = document.getElementById('btnSaveRate');
+        btn.innerText = "กำลังบันทึก..."; btn.disabled = true;
+
+        var data = { date: document.getElementById('rateDate').value, currency: document.getElementById('newCurrency').value, rate: document.getElementById('newRate').value };
+        google.script.run.withSuccessHandler(function(res) {
+          btn.innerText = "💾 บันทึกเรทเงิน"; btn.disabled = false;
+          document.getElementById('newRate').value = "";
+          showStatusBanner('statusSettings', res, res.indexOf("✅") >= 0);
+          loadAppData(true);
+        }).saveRate(data);
+      }
+    
+      var calcInputStr = "0";
+      var calcMode = "foreignToThb"; // 'foreignToThb' or 'thbToForeign'
+
+      function openQuickCalcModal() {
+        var trip = getCurrentTrip() || (appData.trips && appData.trips[0]);
+        if (!trip) {
+          alert("กรุณาเลือกหรือสร้างทริปก่อนใช้งานครับ");
+          return;
+        }
+        selectedTripName = trip.name;
+        var curr = trip.defaultCurrency || 'THB';
+        var lbl1 = document.getElementById('calcCurrLabel');
+        if (lbl1) lbl1.innerText = curr;
+        var lbl2 = document.getElementById('homeCalcCurr');
+        if (lbl2) lbl2.innerText = curr;
+        calcInputStr = "0";
+        calcMode = "foreignToThb";
+        updateCalcModeUI();
+        updateCalcDisplay();
+        var modal = document.getElementById('quickCalcModal');
+        showModalAtViewport('quickCalcModal');
+      }
+
+      function closeQuickCalcModal() {
+        document.getElementById('quickCalcModal').style.display = 'none';
+      }
+
+      function setCalcMode(mode) {
+        calcMode = mode;
+        updateCalcModeUI();
+        calcInputStr = "0";
+        updateCalcDisplay();
+      }
+
+      function updateCalcModeUI() {
+        var btn1 = document.getElementById('calcMode1Btn');
+        var btn2 = document.getElementById('calcMode2Btn');
+        if (!btn1 || !btn2) return;
+        if (calcMode === 'foreignToThb') {
+          btn1.style.background = '#fff'; btn1.style.color = '#333';
+          btn2.style.background = 'transparent'; btn2.style.color = '#666';
+        } else {
+          btn1.style.background = 'transparent'; btn1.style.color = '#666';
+          btn2.style.background = '#fff'; btn2.style.color = '#333';
+        }
+      }
+
+      function appendCalcKey(key) {
+        if (key === 'C') {
+          if (calcInputStr.length > 1) {
+            calcInputStr = calcInputStr.slice(0, -1);
+          } else {
+            calcInputStr = "0";
+          }
+        } else if (key === '.') {
+          if (calcInputStr.indexOf('.') === -1) {
+            calcInputStr += '.';
+          }
+        } else {
+          if (calcInputStr === "0") {
+            calcInputStr = key;
+          } else {
+            calcInputStr += key;
+          }
+        }
+        updateCalcDisplay();
+      }
+
+      function updateCalcDisplay() {
+        var trip = getCurrentTrip() || (appData.trips && appData.trips[0]);
+        if (!trip) return;
+        var curr = trip.defaultCurrency || 'THB';
+        var amt = parseFloat(calcInputStr) || 0;
+        
+        var rates = (appData && appData.rates) || [];
+        var rateObj = rates.filter(function(r) { return r && r.currency === curr; }).sort(function(a,b){ return (b.date || '').localeCompare(a.date || ''); })[0];
+        var rate = rateObj ? parseFloat(rateObj.rate) || 1 : (parseFloat(trip.defaultRate) || 1);
+        var rateDateStr = rateObj ? (rateObj.date || 'ตั้งต้น') : 'ตั้งต้น';
+
+        var inputEl = document.getElementById('calcInputDisplay');
+        var resEl = document.getElementById('calcResultDisplay');
+        var rateInfoEl = document.getElementById('calcRateInfo');
+
+        if (calcMode === 'foreignToThb') {
+          if (inputEl) inputEl.innerText = calcInputStr + " " + curr;
+          var thb = amt * rate;
+          if (resEl) resEl.innerText = thb.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + " ฿";
+          if (rateInfoEl) rateInfoEl.innerText = "เรทล่าสุด (" + rateDateStr + "): 1 " + curr + " = " + rate + " ฿";
+        } else {
+          if (inputEl) inputEl.innerText = calcInputStr + " ฿";
+          var foreign = rate > 0 ? (amt / rate) : 0;
+          if (resEl) resEl.innerText = foreign.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + " " + curr;
+          if (rateInfoEl) rateInfoEl.innerText = "เรทล่าสุด (" + rateDateStr + "): 1 " + curr + " = " + rate + " ฿";
+        }
+
+        var previewEl = document.getElementById('homeCalcPreview');
+        if (previewEl) {
+          previewEl.innerText = "1 " + curr + " ≈ " + rate + " ฿ (กดเพื่อคำนวณ)";
+        }
+      }
+</script>
+  </body>
+</html>
