@@ -501,6 +501,7 @@
         </div>
         <div id="tripListContainer"></div>
         <button class="submit-btn" style="background-color: #3E7B5D; margin-top: 15px;" onclick="showView('viewNewTrip')">➕ สร้างทริปใหม่</button>
+        <button type="button" onclick="logoutAppPin()" style="width: 100%; background: #fdedec; color: #c0392b; border: 1px solid #fadbd8; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 10px; font-family: 'Prompt', sans-serif;">🚪 ออกจากระบบ (ล้างรหัส PIN)</button>
       </div>
 
       <div id="viewNewTrip" style="display:none;">
@@ -802,6 +803,9 @@
               <button type="submit" class="submit-btn" id="btnEditTrip">💾 บันทึกข้อมูลทริป</button>
             </form>
             <div id="statusEditTrip" class="status-banner"></div>
+            <div style="margin-top: 24px; padding-top: 18px; border-top: 1px dashed #e0e0e0; text-align: center;">
+              <button type="button" onclick="logoutAppPin()" style="width: 100%; background: #fdedec; color: #c0392b; border: 1px solid #fadbd8; padding: 12px; border-radius: 12px; font-size: 14px; font-weight: bold; cursor: pointer; font-family: 'Prompt', sans-serif;">🚪 ออกจากระบบ (ล้างรหัส PIN ออกจากเครื่องนี้)</button>
+            </div>
           </div>
           <div id="viewSettingsRates" style="display:none;">
             <form onsubmit="submitNewRate(event)">
@@ -1087,6 +1091,16 @@
       function hidePinLockModal() {
         var modal = document.getElementById('pinLockModal');
         if (modal) modal.style.display = 'none';
+      }
+
+      function logoutAppPin() {
+        if (!confirm("ต้องการออกจากระบบและล้างรหัส PIN ออกจากเครื่องนี้ใช่หรือไม่?")) return;
+        clearSavedPin();
+        selectedTripName = null;
+        appData = { trips: [], rates: [], fundBalances: {}, tripNotes: {}, tripTodos: {} };
+        var bnav = document.getElementById('bottomNav');
+        if (bnav) bnav.style.display = 'none';
+        showPinLockModal(false);
       }
 
       function submitAppPin(event) {
